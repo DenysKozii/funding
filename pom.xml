@@ -36,7 +36,7 @@
                 <version>2.2.0</version>
                 <configuration>
                     <version>1</version>
-                    <projectId>GCLOUD_CONFIG</projectId>
+                    <projectId>funding-bot-370321</projectId>
                 </configuration>
             </plugin>
         </plugins>
