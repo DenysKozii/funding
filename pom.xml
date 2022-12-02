@@ -54,7 +54,7 @@
                 <version>2.4.4</version>
                 <configuration>
                     <version>1</version>
-                    <projectId>funding-bot-370321</projectId>
+                    <projectId>funding-bot-370408</projectId>
                     <version>GCLOUD_CONFIG</version>
                 </configuration>
             </plugin>
