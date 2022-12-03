@@ -8,7 +8,6 @@ import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Position;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -32,9 +31,7 @@ import java.util.Optional;
 public class TradeImpl implements Trade {
 
     String websocketUrl;
-
     Double tradePercentage;
-
     Integer leverage;
     @NonFinal
     String symbol;
@@ -70,13 +67,16 @@ public class TradeImpl implements Trade {
             return;
         }
 
-        clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
+        try {
+            clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
+        } catch (Exception ignored) {
+        }
         clientFutures.changeInitialLeverage(symbol, leverage);
 
         double quantity = availableQuantity();
         quantity *= 2;
         quantity /= price;
-        String positionQuantity = String.valueOf((int) quantity);
+        String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.2f", quantity);
         log.info("position quantity = {}", positionQuantity);
         if (rate < 0) {
             orderSide = OrderSide.BUY;
