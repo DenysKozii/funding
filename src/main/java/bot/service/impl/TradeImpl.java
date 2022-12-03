@@ -8,7 +8,6 @@ import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Position;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -70,7 +69,10 @@ public class TradeImpl implements Trade {
             return;
         }
 
-        clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
+        try {
+            clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
+        } catch (Exception ignored) {
+        }
         clientFutures.changeInitialLeverage(symbol, leverage);
 
         double quantity = availableQuantity();
