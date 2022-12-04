@@ -68,7 +68,7 @@ public class Scheduler {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "8 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "6 0 0 * * *", zone = "GMT+0")
     public void close01() {
         close(1);
     }

@@ -40,8 +40,6 @@ public class TradeImpl implements Trade {
     Double price;
     @NonFinal
     OrderSide orderSide;
-    @NonFinal
-    boolean closed;
 
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
@@ -79,26 +77,20 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
         }
-        closed = false;
     }
 
     @Override
     public void close(SyncRequestClient clientFutures) {
-        if (closed) {
-            log.info("close for {} is ignored", symbol);
-            return;
-        }
-
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
 
-        if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0) {
-            log.info("position {} is closed", symbol);
-            closed = true;
+        if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
+            log.info("position {} is already closed", symbol);
             return;
         }
 
         String positionQuantity = position.get().getPositionAmt().toString();
+        log.info("close {} position quantity = {}", symbol, positionQuantity);
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);

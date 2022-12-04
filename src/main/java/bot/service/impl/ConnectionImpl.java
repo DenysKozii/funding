@@ -91,6 +91,6 @@ public class ConnectionImpl implements Connection {
             credentialsMap.put(key, secret);
             return "connected";
         }
-        return "already exists";
+        return "connection already exists";
     }
 }
