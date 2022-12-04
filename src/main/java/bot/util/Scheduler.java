@@ -44,6 +44,7 @@ public class Scheduler {
     }
 
     private void open() {
+        trade.updateFunding();
         log.info("open started");
         connection.getClientFutures().forEach(trade::open);
         log.info("open finished");

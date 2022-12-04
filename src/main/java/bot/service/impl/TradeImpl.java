@@ -57,7 +57,6 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
-        updateFunding();
         if (Math.abs(rate) < tradeLimit) {
             log.info("rate is lower than limit {}", tradeLimit);
             return;
@@ -71,7 +70,7 @@ public class TradeImpl implements Trade {
         double quantity = availableQuantity(clientFutures);
         quantity *= 2;
         quantity /= price;
-        String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.2f", quantity);
+        String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
         if (rate < 0) {
             orderSide = OrderSide.BUY;
