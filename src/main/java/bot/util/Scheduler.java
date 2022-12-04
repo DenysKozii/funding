@@ -57,24 +57,6 @@ public class Scheduler {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "58 59 21 * * *", zone = "GMT+0")
-    public void open2h() {
-        open();
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = "0 0 22 * * *", zone = "GMT+0")
-    public void close2h0() {
-        close(0);
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = "6 0 22 * * *", zone = "GMT+0")
-    public void close2h1() {
-        close(1);
-    }
-
-    @SneakyThrows
     @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
