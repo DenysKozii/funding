@@ -21,10 +21,8 @@ public class UserRestController {
     }
 
     @PostMapping("credentials")
-    public String credentials(@RequestBody CredentialsDto credentialsDto) {
-        connection.writeCredentials(credentialsDto);
-        connection.connect();
-        return "credentials injected";
+    public String addCredentials(@RequestBody CredentialsDto credentialsDto) {
+        return connection.addCredentials(credentialsDto);
     }
 
 }

@@ -1,6 +1,5 @@
 package bot.service.impl;
 
-import bot.service.Connection;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.*;
@@ -43,24 +42,20 @@ public class TradeImpl implements Trade {
     OrderSide orderSide;
     @NonFinal
     boolean closed;
-    Connection connection;
 
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
                      @Value("${leverage}") Integer leverage,
-                     @Value("${symbol.default}") String symbol,
-                     Connection connection) {
+                     @Value("${symbol.default}") String symbol) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.leverage = leverage;
         this.symbol = symbol;
-        this.connection = connection;
     }
 
     @Override
     @SneakyThrows
-    public void open() {
-        SyncRequestClient clientFutures = connection.getClientFutures();
+    public void open(SyncRequestClient clientFutures) {
         updateFunding();
         if (Math.abs(rate) < 0.001) {
             log.info("rate is lower than limit {}", 0.001);
@@ -69,32 +64,30 @@ public class TradeImpl implements Trade {
 
         try {
             clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
         clientFutures.changeInitialLeverage(symbol, leverage);
 
-        double quantity = availableQuantity();
+        double quantity = availableQuantity(clientFutures);
         quantity *= 2;
         quantity /= price;
         String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.2f", quantity);
         log.info("position quantity = {}", positionQuantity);
         if (rate < 0) {
             orderSide = OrderSide.BUY;
-            sendOrder(positionQuantity);
+            sendOrder(positionQuantity, clientFutures);
         } else {
             orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity);
+            sendOrder(positionQuantity, clientFutures);
         }
         closed = false;
     }
 
     @Override
-    public void close() {
+    public void close(SyncRequestClient clientFutures) {
         if (closed) {
             log.info("close for {} is ignored", symbol);
             return;
         }
-        SyncRequestClient clientFutures = connection.getClientFutures();
 
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
@@ -108,17 +101,17 @@ public class TradeImpl implements Trade {
         String positionQuantity = position.get().getPositionAmt().toString();
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity);
+            sendOrder(positionQuantity, clientFutures);
         } else {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
-            sendOrder(positionQuantity);
+            sendOrder(positionQuantity, clientFutures);
         }
     }
 
     @Override
-    public void sendOrder(String positionQuantity) {
-        connection.getClientFutures().postOrder(
+    public void sendOrder(String positionQuantity, SyncRequestClient clientFutures) {
+        clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
@@ -144,8 +137,8 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public double availableQuantity() {
-        AccountInformation accountInformation = connection.getClientFutures().getAccountInformation();
+    public double availableQuantity(SyncRequestClient clientFutures) {
+        AccountInformation accountInformation = clientFutures.getAccountInformation();
         double quantity = accountInformation.getAvailableBalance().doubleValue();
         return Math.max(quantity * tradePercentage, 0);
     }

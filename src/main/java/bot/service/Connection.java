@@ -3,14 +3,14 @@ package bot.service;
 import bot.dto.CredentialsDto;
 import com.binance.client.SyncRequestClient;
 
-public interface Connection {
+import java.util.List;
 
-    void connect();
+public interface Connection {
 
     void readCredentials();
 
-    void writeCredentials(CredentialsDto credentials);
+    String addCredentials(CredentialsDto credentials);
 
-    SyncRequestClient getClientFutures();
+    List<SyncRequestClient> getClientFutures();
 
 }

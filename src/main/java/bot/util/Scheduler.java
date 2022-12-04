@@ -1,5 +1,6 @@
 package bot.util;
 
+import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
@@ -25,11 +26,13 @@ public class Scheduler {
 
     String herokuUrl;
     Trade trade;
+    Connection connection;
 
     @Autowired
-    public Scheduler(@Value("${heroku.url}") String herokuUrl, Trade trade) {
+    public Scheduler(@Value("${heroku.url}") String herokuUrl, Trade trade, Connection connection) {
         this.herokuUrl = herokuUrl;
         this.trade = trade;
+        this.connection = connection;
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 4)
@@ -40,8 +43,20 @@ public class Scheduler {
         }
     }
 
+    private void open() {
+        log.info("open started");
+        connection.getClientFutures().forEach(trade::open);
+        log.info("open finished");
+    }
+
+    private void close(Integer number) {
+        log.info("close {} started", number);
+        connection.getClientFutures().forEach(trade::close);
+        log.info("close {} finished", number);
+    }
+
     @SneakyThrows
-    @Scheduled(cron = "59 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
@@ -71,7 +86,7 @@ public class Scheduler {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "59 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "58 59 7 * * *", zone = "GMT+0")
     public void open8() {
         open();
     }
@@ -101,7 +116,7 @@ public class Scheduler {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "59 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "58 59 15 * * *", zone = "GMT+0")
     public void open16() {
         open();
     }
@@ -128,17 +143,5 @@ public class Scheduler {
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
     public void close163() {
         close(3);
-    }
-
-    private void open() {
-        log.info("open started");
-        trade.open();
-        log.info("open finished");
-    }
-
-    private void close(Integer number) {
-        log.info("close {} started", number);
-        trade.close();
-        log.info("close {} finished", number);
     }
 }
