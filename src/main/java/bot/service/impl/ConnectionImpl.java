@@ -89,7 +89,8 @@ public class ConnectionImpl implements Connection {
             writer.newLine();
             writer.close();
             credentialsMap.put(key, secret);
+            return "connected";
         }
-        return "connected";
+        return "already exists";
     }
 }
