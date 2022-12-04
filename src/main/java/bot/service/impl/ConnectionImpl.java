@@ -1,6 +1,8 @@
 package bot.service.impl;
 
 import bot.dto.CredentialsDto;
+import bot.entity.Credentials;
+import bot.repository.CredentialsRepository;
 import bot.service.Connection;
 import com.binance.client.RequestOptions;
 import com.binance.client.SyncRequestClient;
@@ -12,17 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Data
@@ -32,47 +29,25 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConnectionImpl implements Connection {
 
-    String credentialsFile;
-    List<SyncRequestClient> clientFutures = new ArrayList<>();
-    Map<String, String> credentialsMap = new HashMap<>();
+    CredentialsRepository credentialsRepository;
 
-    @Autowired
-    public ConnectionImpl(@Value("${credentials.file}") String credentialsFile) {
-        this.credentialsFile = credentialsFile;
-    }
+    List<SyncRequestClient> clientFutures = new ArrayList<>();
+
 
     @SneakyThrows
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
-        readCredentials();
-        credentialsMap.forEach((key, value) -> clientFutures.add(BinanceApiInternalFactory
+        credentialsRepository.findAll().forEach(credentials -> clientFutures.add(BinanceApiInternalFactory
                 .getInstance()
-                .createSyncRequestClient(key, value, new RequestOptions())));
+                .createSyncRequestClient(credentials.getKey(), credentials.getSecret(), new RequestOptions())));
         clientFutures.forEach(client -> log.info("connected to an account with balance = {}",
                 client.getAccountInformation().getAvailableBalance()));
     }
 
     @SneakyThrows
     @Override
-    public void readCredentials() {
-        File file = new File(credentialsFile);
-        if (!file.exists()) {
-            return;
-        }
-        try (FileReader reader = new FileReader(file);
-             BufferedReader br = new BufferedReader(reader)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] credentialsLine = line.split(";");
-                credentialsMap.putIfAbsent(credentialsLine[0], credentialsLine[1]);
-            }
-        }
-    }
-
-    @SneakyThrows
-    @Override
     public String addCredentials(CredentialsDto credentials) {
-        if (!credentialsMap.containsKey(credentials.getKey())) {
+        if (!credentialsRepository.existsById(credentials.getKey())) {
             String key = credentials.getKey();
             String secret = credentials.getSecret();
             try {
@@ -84,11 +59,7 @@ public class ConnectionImpl implements Connection {
                 log.error(binanceApiException.getMessage());
                 return binanceApiException.getMessage();
             }
-            BufferedWriter writer = new BufferedWriter(new FileWriter(credentialsFile, true));
-            writer.write(key + ";" + secret);
-            writer.newLine();
-            writer.close();
-            credentialsMap.put(key, secret);
+            credentialsRepository.save(new Credentials(key, secret));
             return "connected";
         }
         return "connection already exists";

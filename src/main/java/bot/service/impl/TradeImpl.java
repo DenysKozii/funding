@@ -31,6 +31,7 @@ public class TradeImpl implements Trade {
 
     String websocketUrl;
     Double tradePercentage;
+    Double tradeLimit;
     Integer leverage;
     @NonFinal
     String symbol;
@@ -43,10 +44,12 @@ public class TradeImpl implements Trade {
 
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
+                     @Value("${trade.limit}") Double tradeLimit,
                      @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
+        this.tradeLimit = tradeLimit;
         this.leverage = leverage;
         this.symbol = symbol;
     }
@@ -55,8 +58,8 @@ public class TradeImpl implements Trade {
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
         updateFunding();
-        if (Math.abs(rate) < 0.001) {
-            log.info("rate is lower than limit {}", 0.001);
+        if (Math.abs(rate) < tradeLimit) {
+            log.info("rate is lower than limit {}", tradeLimit);
             return;
         }
 

@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface Connection {
 
-    void readCredentials();
-
     String addCredentials(CredentialsDto credentials);
 
     List<SyncRequestClient> getClientFutures();
