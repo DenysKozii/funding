@@ -10,10 +10,10 @@ import com.binance.client.exception.BinanceApiException;
 import com.binance.client.impl.BinanceApiInternalFactory;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,6 @@ import java.util.List;
 @Data
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConnectionImpl implements Connection {
 
@@ -33,6 +32,10 @@ public class ConnectionImpl implements Connection {
 
     List<SyncRequestClient> clientFutures = new ArrayList<>();
 
+    @Autowired
+    public ConnectionImpl(CredentialsRepository credentialsRepository) {
+        this.credentialsRepository = credentialsRepository;
+    }
 
     @SneakyThrows
     @EventListener(ApplicationReadyEvent.class)
