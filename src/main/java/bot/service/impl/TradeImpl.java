@@ -72,7 +72,7 @@ public class TradeImpl implements Trade {
         quantity /= price;
         String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
-        if (rate < 0) {
+        if (rate > 0) {
             orderSide = OrderSide.BUY;
             sendOrder(positionQuantity, clientFutures);
         } else {

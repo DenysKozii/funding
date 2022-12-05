@@ -35,12 +35,13 @@ public class Scheduler {
         this.connection = connection;
     }
 
-    @Scheduled(fixedRate = 1000 * 60 * 4)
+    @Scheduled(fixedRate = 1000 * 60 * 5)
     public void timer() throws IOException {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             HttpUriRequest request = new HttpGet(herokuUrl);
             client.execute(request);
         }
+        trade.updateFunding();
     }
 
     private void open() {
@@ -57,91 +58,91 @@ public class Scheduler {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close0() {
         close(0);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "6 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
     public void close01() {
         close(1);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "8 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "20 0 0 * * *", zone = "GMT+0")
     public void close02() {
         close(2);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "25 0 0 * * *", zone = "GMT+0")
     public void close03() {
         close(3);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "58 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
     public void open8() {
         open();
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close8() {
         close(0);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "6 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
     public void close81() {
         close(1);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "8 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "20 0 8 * * *", zone = "GMT+0")
     public void close82() {
         close(2);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "25 0 8 * * *", zone = "GMT+0")
     public void close83() {
         close(3);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "58 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
     public void open16() {
         open();
     }
 
     @SneakyThrows
-    @Scheduled(cron = "1 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
     public void close16() {
         close(0);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "6 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")
     public void close161() {
         close(1);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "8 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "20 0 16 * * *", zone = "GMT+0")
     public void close162() {
         close(2);
     }
 
     @SneakyThrows
-    @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "25 0 16 * * *", zone = "GMT+0")
     public void close163() {
         close(3);
     }
