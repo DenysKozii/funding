@@ -68,7 +68,7 @@ public class TradeImpl implements Trade {
         clientFutures.changeInitialLeverage(symbol, leverage);
 
         double quantity = availableQuantity(clientFutures);
-        quantity *= 2;
+        quantity *= leverage;
         quantity /= price;
         String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
