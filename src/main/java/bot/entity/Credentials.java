@@ -20,4 +20,6 @@ public class Credentials {
 
     String secret;
 
+    String name;
+
 }

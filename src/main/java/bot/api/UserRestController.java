@@ -1,7 +1,7 @@
 package bot.api;
 
 import bot.dto.CredentialsDto;
-import bot.entity.Log;
+import bot.dto.LogDto;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -26,7 +26,7 @@ public class UserRestController {
     }
 
     @GetMapping("logs")
-    public List<Log> getLogs() {
+    public List<LogDto> getLogs() {
         return trade.getLogs();
     }
 

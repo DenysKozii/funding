@@ -1,14 +1,31 @@
 package bot.dto;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@AllArgsConstructor
+@Builder
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LogDto {
-    String key;
-    String secret;
+
+    String date;
+
+    String name;
+
+    String symbol;
+
+    Double rate;
+
+    Double price;
+
+    OrderStatus orderStatus;
+
+    Double changePercents;
+
+    Double accountBalance;
+
 }

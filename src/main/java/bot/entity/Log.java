@@ -1,6 +1,7 @@
 package bot.entity;
 
 import bot.dto.OrderStatus;
+import com.binance.client.model.enums.OrderSide;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
@@ -26,6 +27,8 @@ public class Log {
     Double price;
 
     OrderStatus orderStatus;
+
+    OrderSide orderSide;
 
     Double accountBalance;
 

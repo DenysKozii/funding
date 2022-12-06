@@ -1,7 +1,7 @@
 package bot.service;
 
+import bot.dto.LogDto;
 import bot.dto.OrderStatus;
-import bot.entity.Log;
 import com.binance.client.SyncRequestClient;
 
 import java.util.List;
@@ -20,6 +20,6 @@ public interface Trade {
 
     double getAccountBalance(SyncRequestClient clientFutures);
 
-    List<Log> getLogs();
+    List<LogDto> getLogs();
 
 }

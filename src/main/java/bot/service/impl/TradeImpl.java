@@ -1,5 +1,6 @@
 package bot.service.impl;
 
+import bot.dto.LogDto;
 import bot.dto.OrderStatus;
 import bot.entity.Log;
 import bot.repository.LogRepository;
@@ -27,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -77,10 +79,11 @@ public class TradeImpl implements Trade {
 
         try {
             clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         clientFutures.changeInitialLeverage(symbol, leverage);
         double accountBalance = getAccountBalance(clientFutures);
-        double quantity =  Math.max(accountBalance * tradePercentage, 0);
+        double quantity = Math.max(accountBalance * tradePercentage, 0);
         quantity *= leverage;
         quantity /= price;
         String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
@@ -107,6 +110,7 @@ public class TradeImpl implements Trade {
                 .price(price)
                 .orderStatus(orderStatus)
                 .accountBalance(accountBalance)
+                .orderSide(orderSide)
                 .build();
         logRepository.save(log);
     }
@@ -168,8 +172,26 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public List<Log> getLogs() {
-        return logRepository.findAll();
+    public List<LogDto> getLogs() {
+        List<LogDto> logs = new ArrayList<>();
+        double openPrice = 0;
+        for (Log log : logRepository.findAll()) {
+            if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
+                openPrice = log.getPrice();
+            }
+            LogDto logDto = LogDto.builder()
+                    .date(log.getDate())
+                    .symbol(log.getSymbol())
+                    .rate(log.getRate())
+                    .orderStatus(log.getOrderStatus())
+                    .price(log.getPrice())
+                    .accountBalance(log.getAccountBalance())
+                    .price(OrderSide.BUY.equals(log.getOrderSide()) ? log.getPrice() / openPrice : openPrice / log.getPrice())
+                    .build();
+            logs.add(logDto);
+        }
+        return logs;
     }
+
 
 }
