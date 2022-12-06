@@ -92,6 +92,13 @@ public class Scheduler {
     }
 
     @SneakyThrows
+    @Scheduled(cron = "30 0 0 * * *", zone = "GMT+0")
+    public void close04() {
+        close(4);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @SneakyThrows
     @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
     public void open8() {
         open();
@@ -125,6 +132,13 @@ public class Scheduler {
     }
 
     @SneakyThrows
+    @Scheduled(cron = "30 0 8 * * *", zone = "GMT+0")
+    public void close84() {
+        close(4);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @SneakyThrows
     @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
     public void open16() {
         open();
@@ -154,6 +168,13 @@ public class Scheduler {
     @Scheduled(cron = "25 0 16 * * *", zone = "GMT+0")
     public void close163() {
         close(3);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @SneakyThrows
+    @Scheduled(cron = "30 0 16 * * *", zone = "GMT+0")
+    public void close164() {
+        close(4);
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 }

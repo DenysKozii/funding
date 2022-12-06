@@ -97,6 +97,7 @@ public class TradeImpl implements Trade {
 
     @Override
     public void logOrder(OrderStatus orderStatus, Double accountBalance) {
+        updateFunding();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSSSS");
         Date date = new Date();
         Log log = Log.builder()
