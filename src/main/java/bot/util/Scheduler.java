@@ -4,7 +4,6 @@ import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
-import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpGet;
@@ -52,129 +51,183 @@ public class Scheduler {
         log.info("open finished");
     }
 
-    private void close(Integer number) {
-        log.info("close {} started", number);
+    private void close() {
+        log.info("close started");
         connection.getClientFutures().forEach(trade::close);
-        log.info("close {} finished", number);
+        log.info("close finished");
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
 
-    @SneakyThrows
+    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
+    public void close05() {
+        close();
+    }
+
+    @Scheduled(cron = "6 0 0 * * *", zone = "GMT+0")
+    public void close06() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "7 0 0 * * *", zone = "GMT+0")
+    public void close07() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "8 0 0 * * *", zone = "GMT+0")
-    public void close0() {
-        close(0);
+    public void close08() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
-    @SneakyThrows
+    @Scheduled(cron = "9 0 0 * * *", zone = "GMT+0")
+    public void close09() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
+    public void close010() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
-    public void close01() {
-        close(1);
+    public void close015() {
+        close();
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "20 0 0 * * *", zone = "GMT+0")
-    public void close02() {
-        close(2);
-        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = "25 0 0 * * *", zone = "GMT+0")
-    public void close03() {
-        close(3);
-        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
-    }
-
-    @SneakyThrows
     @Scheduled(cron = "30 0 0 * * *", zone = "GMT+0")
-    public void close04() {
-        close(4);
+    public void close030() {
+        close();
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "59 0 0 * * *", zone = "GMT+0")
+    public void close059() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "58 59 7 * * *", zone = "GMT+0")
     public void open8() {
         open();
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
     public void close8() {
-        close(0);
+        close();
     }
 
-    @SneakyThrows
+    @Scheduled(cron = "6 0 8 * * *", zone = "GMT+0")
+    public void close86() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "7 0 8 * * *", zone = "GMT+0")
+    public void close87() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "8 0 8 * * *", zone = "GMT+0")
+    public void close88() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "9 0 8 * * *", zone = "GMT+0")
+    public void close89() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
+    public void close810() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
-    public void close81() {
-        close(1);
+    public void close815() {
+        close();
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "20 0 8 * * *", zone = "GMT+0")
-    public void close82() {
-        close(2);
-        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = "25 0 8 * * *", zone = "GMT+0")
-    public void close83() {
-        close(3);
-        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
-    }
-
-    @SneakyThrows
     @Scheduled(cron = "30 0 8 * * *", zone = "GMT+0")
-    public void close84() {
-        close(4);
+    public void close830() {
+        close();
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "59 0 8 * * *", zone = "GMT+0")
+    public void close859() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "58 59 15 * * *", zone = "GMT+0")
     public void open16() {
         open();
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
     public void close16() {
-        close(0);
+        close();
     }
 
-    @SneakyThrows
+    @Scheduled(cron = "6 0 16 * * *", zone = "GMT+0")
+    public void close166() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "7 0 16 * * *", zone = "GMT+0")
+    public void close167() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "8 0 16 * * *", zone = "GMT+0")
+    public void close168() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "9 0 16 * * *", zone = "GMT+0")
+    public void close169() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
+    public void close1610() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")
-    public void close161() {
-        close(1);
+    public void close1615() {
+        close();
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
-    @SneakyThrows
-    @Scheduled(cron = "20 0 16 * * *", zone = "GMT+0")
-    public void close162() {
-        close(2);
-        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = "25 0 16 * * *", zone = "GMT+0")
-    public void close163() {
-        close(3);
-        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
-    }
-
-    @SneakyThrows
     @Scheduled(cron = "30 0 16 * * *", zone = "GMT+0")
-    public void close164() {
-        close(4);
+    public void close1630() {
+        close();
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
+    }
+
+    @Scheduled(cron = "59 0 16 * * *", zone = "GMT+0")
+    public void close1659() {
+        close();
         trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 }

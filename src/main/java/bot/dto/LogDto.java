@@ -1,5 +1,6 @@
 package bot.dto;
 
+import com.binance.client.model.enums.OrderSide;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,8 @@ public class LogDto {
     Double price;
 
     OrderStatus orderStatus;
+
+    OrderSide orderSide;
 
     Double changePercents;
 

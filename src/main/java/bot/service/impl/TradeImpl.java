@@ -83,12 +83,12 @@ public class TradeImpl implements Trade {
         }
         clientFutures.changeInitialLeverage(symbol, leverage);
         double accountBalance = getAccountBalance(clientFutures);
-        double quantity = Math.max(accountBalance * tradePercentage, 0);
+        double quantity = accountBalance * tradePercentage;
         quantity *= leverage;
         quantity /= price;
         String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
-        if (rate > 0) {
+        if (rate < 0) {
             orderSide = OrderSide.BUY;
             sendOrder(positionQuantity, clientFutures);
         } else {
@@ -96,23 +96,6 @@ public class TradeImpl implements Trade {
             sendOrder(positionQuantity, clientFutures);
         }
         logOrder(OrderStatus.OPEN, accountBalance);
-    }
-
-    @Override
-    public void logOrder(OrderStatus orderStatus, Double accountBalance) {
-        updateFunding();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSSSS");
-        Date date = new Date();
-        Log log = Log.builder()
-                .date(dateFormat.format(date))
-                .symbol(symbol)
-                .rate(rate)
-                .price(price)
-                .orderStatus(orderStatus)
-                .accountBalance(accountBalance)
-                .orderSide(orderSide)
-                .build();
-        logRepository.save(log);
     }
 
     @Override
@@ -175,9 +158,11 @@ public class TradeImpl implements Trade {
     public List<LogDto> getLogs() {
         List<LogDto> logs = new ArrayList<>();
         double openPrice = 0;
+        OrderSide openOrderSide = OrderSide.BUY;
         for (Log log : logRepository.findAll()) {
             if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
                 openPrice = log.getPrice();
+                openOrderSide = log.getOrderSide();
             }
             LogDto logDto = LogDto.builder()
                     .date(log.getDate())
@@ -186,12 +171,29 @@ public class TradeImpl implements Trade {
                     .orderStatus(log.getOrderStatus())
                     .price(log.getPrice())
                     .accountBalance(log.getAccountBalance())
-                    .price(OrderSide.BUY.equals(log.getOrderSide()) ? log.getPrice() / openPrice : openPrice / log.getPrice())
+                    .orderSide(log.getOrderSide())
+                    .changePercents(OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice())
                     .build();
             logs.add(logDto);
         }
         return logs;
     }
 
+    @Override
+    public void logOrder(OrderStatus orderStatus, Double accountBalance) {
+        updateFunding();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSSSS");
+        Date date = new Date();
+        Log log = Log.builder()
+                .date(dateFormat.format(date))
+                .symbol(symbol)
+                .rate(rate)
+                .price(price)
+                .orderStatus(orderStatus)
+                .accountBalance(accountBalance)
+                .orderSide(orderSide)
+                .build();
+        logRepository.save(log);
+    }
 
 }
