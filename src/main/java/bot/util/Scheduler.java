@@ -1,5 +1,6 @@
 package bot.util;
 
+import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -73,18 +74,21 @@ public class Scheduler {
     @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
     public void close01() {
         close(1);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
     @Scheduled(cron = "20 0 0 * * *", zone = "GMT+0")
     public void close02() {
         close(2);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
     @Scheduled(cron = "25 0 0 * * *", zone = "GMT+0")
     public void close03() {
         close(3);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
@@ -103,18 +107,21 @@ public class Scheduler {
     @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
     public void close81() {
         close(1);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
     @Scheduled(cron = "20 0 8 * * *", zone = "GMT+0")
     public void close82() {
         close(2);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
     @Scheduled(cron = "25 0 8 * * *", zone = "GMT+0")
     public void close83() {
         close(3);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
@@ -133,17 +140,20 @@ public class Scheduler {
     @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")
     public void close161() {
         close(1);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
     @Scheduled(cron = "20 0 16 * * *", zone = "GMT+0")
     public void close162() {
         close(2);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 
     @SneakyThrows
     @Scheduled(cron = "25 0 16 * * *", zone = "GMT+0")
     public void close163() {
         close(3);
+        trade.logOrder(OrderStatus.BUFFER_CLOSE, 0.0);
     }
 }

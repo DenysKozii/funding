@@ -1,5 +1,6 @@
 package bot.entity;
 
+import bot.dto.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
@@ -16,8 +17,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Log {
 
     @Id
-    String key;
+    String date;
 
-    String secret;
+    String symbol;
+
+    Double rate;
+
+    Double price;
+
+    OrderStatus orderStatus;
+
+    Double accountBalance;
 
 }

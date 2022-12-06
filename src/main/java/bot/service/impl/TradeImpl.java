@@ -1,6 +1,8 @@
 package bot.service.impl;
 
-import bot.dto.LogDto;
+import bot.dto.OrderStatus;
+import bot.entity.Log;
+import bot.repository.LogRepository;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.*;
@@ -17,11 +19,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,16 +50,21 @@ public class TradeImpl implements Trade {
     @NonFinal
     OrderSide orderSide;
 
+    LogRepository logRepository;
+
+    @Autowired
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
                      @Value("${trade.limit}") Double tradeLimit,
                      @Value("${leverage}") Integer leverage,
-                     @Value("${symbol.default}") String symbol) {
+                     @Value("${symbol.default}") String symbol,
+                     LogRepository logRepository) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.tradeLimit = tradeLimit;
         this.leverage = leverage;
         this.symbol = symbol;
+        this.logRepository = logRepository;
     }
 
     @Override
@@ -68,8 +79,8 @@ public class TradeImpl implements Trade {
             clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
         } catch (Exception ignored) {}
         clientFutures.changeInitialLeverage(symbol, leverage);
-
-        double quantity = availableQuantity(clientFutures);
+        double accountBalance = getAccountBalance(clientFutures);
+        double quantity =  Math.max(accountBalance * tradePercentage, 0);
         quantity *= leverage;
         quantity /= price;
         String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
@@ -81,6 +92,22 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
         }
+        logOrder(OrderStatus.OPEN, accountBalance);
+    }
+
+    @Override
+    public void logOrder(OrderStatus orderStatus, Double accountBalance) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSSSS");
+        Date date = new Date();
+        Log log = Log.builder()
+                .date(dateFormat.format(date))
+                .symbol(symbol)
+                .rate(rate)
+                .price(price)
+                .orderStatus(orderStatus)
+                .accountBalance(accountBalance)
+                .build();
+        logRepository.save(log);
     }
 
     @Override
@@ -103,6 +130,7 @@ public class TradeImpl implements Trade {
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
             sendOrder(positionQuantity, clientFutures);
         }
+        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
     @Override
@@ -133,14 +161,14 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public double availableQuantity(SyncRequestClient clientFutures) {
+    public double getAccountBalance(SyncRequestClient clientFutures) {
         AccountInformation accountInformation = clientFutures.getAccountInformation();
-        double quantity = accountInformation.getAvailableBalance().doubleValue();
-        return Math.max(quantity * tradePercentage, 0);
+        return accountInformation.getAvailableBalance().doubleValue();
     }
 
     @Override
-    public List<LogDto> getLogs() {
-        return null;
+    public List<Log> getLogs() {
+        return logRepository.findAll();
     }
+
 }

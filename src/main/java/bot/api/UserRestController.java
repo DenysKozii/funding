@@ -1,8 +1,9 @@
 package bot.api;
 
 import bot.dto.CredentialsDto;
-import bot.dto.LogDto;
+import bot.entity.Log;
 import bot.service.Connection;
+import bot.service.Trade;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,10 +18,16 @@ import java.util.List;
 public class UserRestController {
 
     Connection connection;
+    Trade trade;
 
     @GetMapping
     public String alive() {
         return "alive";
+    }
+
+    @GetMapping("logs")
+    public List<Log> getLogs() {
+        return trade.getLogs();
     }
 
     @PostMapping("credentials")
