@@ -62,7 +62,7 @@ public class ConnectionImpl implements Connection {
                 log.error(binanceApiException.getMessage());
                 return binanceApiException.getMessage();
             }
-            credentialsRepository.save(new Credentials(key, secret, "denys"));
+            credentialsRepository.save(new Credentials(key, secret, credentials.getName()));
             return "connected";
         }
         return "connection already exists";

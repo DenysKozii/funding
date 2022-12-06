@@ -167,6 +167,7 @@ public class TradeImpl implements Trade {
             LogDto logDto = LogDto.builder()
                     .date(log.getDate())
                     .symbol(log.getSymbol())
+                    .name("Denys")
                     .rate(log.getRate())
                     .orderStatus(log.getOrderStatus())
                     .price(log.getPrice())
