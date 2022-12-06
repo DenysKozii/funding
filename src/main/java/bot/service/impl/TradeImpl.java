@@ -1,5 +1,6 @@
 package bot.service.impl;
 
+import bot.dto.LogDto;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.*;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Optional;
 
 @Data
@@ -135,5 +137,10 @@ public class TradeImpl implements Trade {
         AccountInformation accountInformation = clientFutures.getAccountInformation();
         double quantity = accountInformation.getAvailableBalance().doubleValue();
         return Math.max(quantity * tradePercentage, 0);
+    }
+
+    @Override
+    public List<LogDto> getLogs() {
+        return null;
     }
 }

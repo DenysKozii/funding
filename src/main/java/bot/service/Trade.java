@@ -1,6 +1,9 @@
 package bot.service;
 
+import bot.dto.LogDto;
 import com.binance.client.SyncRequestClient;
+
+import java.util.List;
 
 public interface Trade {
 
@@ -13,5 +16,7 @@ public interface Trade {
     void updateFunding();
 
     double availableQuantity(SyncRequestClient clientFutures);
+
+    List<LogDto> getLogs();
 
 }
