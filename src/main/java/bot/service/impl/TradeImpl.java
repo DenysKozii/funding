@@ -1,6 +1,7 @@
 package bot.service.impl;
 
 import bot.dto.LogDto;
+import bot.dto.LogPreviewDto;
 import bot.dto.OrderStatus;
 import bot.entity.Log;
 import bot.repository.LogRepository;
@@ -30,6 +31,7 @@ import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -41,12 +43,15 @@ public class TradeImpl implements Trade {
     Double tradePercentage;
     Double tradeLimit;
     Integer leverage;
+    String dateFormatPattern;
     @NonFinal
     String symbol;
     @NonFinal
     Double rate;
     @NonFinal
     Double price;
+    @NonFinal
+    Long groupId;
     @NonFinal
     Double responsePrice;
     @NonFinal
@@ -64,13 +69,16 @@ public class TradeImpl implements Trade {
                      @Value("${trade.limit}") Double tradeLimit,
                      @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol,
+                     @Value("${date.format.pattern}") String dateFormatPattern,
                      LogRepository logRepository) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.tradeLimit = tradeLimit;
         this.leverage = leverage;
         this.symbol = symbol;
+        this.dateFormatPattern = dateFormatPattern;
         this.logRepository = logRepository;
+        this.groupId = logRepository.findAll().get((int)logRepository.count() - 1).getGroupId();
     }
 
     @Override
@@ -88,6 +96,7 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
         }
+        groupId++;
         logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
     }
 
@@ -172,16 +181,17 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public List<LogDto> getLogs() {
+    public List<LogDto> getLogsByGroupId(Long groupId) {
         List<LogDto> logs = new ArrayList<>();
         double openPrice = 0;
         OrderSide openOrderSide = OrderSide.BUY;
-        for (Log log : logRepository.findAll()) {
+        for (Log log : logRepository.findAllByGroupId(groupId)) {
             if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
                 openPrice = log.getPrice();
                 openOrderSide = log.getOrderSide();
             }
             LogDto logDto = LogDto.builder()
+                    .groupId(log.getGroupId())
                     .date(log.getDate())
                     .symbol(log.getSymbol())
                     .name("Denys")
@@ -200,11 +210,20 @@ public class TradeImpl implements Trade {
     }
 
     @Override
+    public List<LogPreviewDto> getLogPreviews() {
+        return logRepository.findAll().stream()
+                .filter(log -> OrderStatus.OPEN.equals(log.getOrderStatus()))
+                .map(log -> new LogPreviewDto(log.getGroupId(), log.getDate(), log.getSymbol()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void logOrder(OrderStatus orderStatus, Double accountBalance) {
         updateFunding();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSSSS");
+        DateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
         Date date = new Date();
         Log log = Log.builder()
+                .groupId(groupId)
                 .date(dateFormat.format(date))
                 .symbol(symbol)
                 .rate(rate)

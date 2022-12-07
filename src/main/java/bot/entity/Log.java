@@ -20,6 +20,8 @@ public class Log {
     @Id
     String date;
 
+    Long groupId;
+
     String symbol;
 
     Double rate;

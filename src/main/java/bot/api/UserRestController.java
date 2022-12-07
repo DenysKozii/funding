@@ -2,6 +2,7 @@ package bot.api;
 
 import bot.dto.CredentialsDto;
 import bot.dto.LogDto;
+import bot.dto.LogPreviewDto;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -25,9 +26,14 @@ public class UserRestController {
         return "alive";
     }
 
+    @GetMapping("logs/{groupId}")
+    public List<LogDto> getLogs(@PathVariable Long groupId) {
+        return trade.getLogsByGroupId(groupId);
+    }
+
     @GetMapping("logs")
-    public List<LogDto> getLogs() {
-        return trade.getLogs();
+    public List<LogPreviewDto> getLogPreviews() {
+        return trade.getLogPreviews();
     }
 
     @PostMapping("credentials")

@@ -1,6 +1,7 @@
 package bot.service;
 
 import bot.dto.LogDto;
+import bot.dto.LogPreviewDto;
 import bot.dto.OrderStatus;
 import com.binance.client.SyncRequestClient;
 
@@ -22,6 +23,7 @@ public interface Trade {
 
     double getAccountBalance(SyncRequestClient clientFutures);
 
-    List<LogDto> getLogs();
+    List<LogDto> getLogsByGroupId(Long groupId);
 
+    List<LogPreviewDto> getLogPreviews();
 }
