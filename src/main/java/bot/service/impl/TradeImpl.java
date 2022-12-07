@@ -205,7 +205,6 @@ public class TradeImpl implements Trade {
                     .build();
             logs.add(logDto);
         }
-        Collections.reverse(logs);
         return logs;
     }
 
@@ -235,5 +234,4 @@ public class TradeImpl implements Trade {
                 .build();
         logRepository.save(log);
     }
-
 }
