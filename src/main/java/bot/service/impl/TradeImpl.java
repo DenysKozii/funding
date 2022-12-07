@@ -50,6 +50,10 @@ public class TradeImpl implements Trade {
     @NonFinal
     Double price;
     @NonFinal
+    Double quantity;
+    @NonFinal
+    String positionQuantity;
+    @NonFinal
     OrderSide orderSide;
 
     LogRepository logRepository;
@@ -72,22 +76,6 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
-        if (Math.abs(rate) < tradeLimit) {
-            log.info("rate is lower than limit {}", tradeLimit);
-            return;
-        }
-
-        try {
-            clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
-        } catch (Exception ignored) {
-        }
-        clientFutures.changeInitialLeverage(symbol, leverage);
-        double accountBalance = getAccountBalance(clientFutures);
-        double quantity = accountBalance * tradePercentage;
-        quantity *= leverage;
-        quantity /= price;
-        String positionQuantity = (int) quantity > 0 ? String.valueOf((int) quantity) : String.format("%.1f", quantity);
-        log.info("position quantity = {}", positionQuantity);
         if (rate < 0) {
             orderSide = OrderSide.BUY;
             sendOrder(positionQuantity, clientFutures);
@@ -95,7 +83,25 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
         }
-        logOrder(OrderStatus.OPEN, accountBalance);
+        logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
+    }
+
+    @Override
+    public void prepareOpen(SyncRequestClient clientFutures) {
+        if (Math.abs(rate) < tradeLimit) {
+            log.info("rate is lower than limit {}", tradeLimit);
+            return;
+        }
+        try {
+            clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
+        } catch (Exception ignored) {
+        }
+        clientFutures.changeInitialLeverage(symbol, leverage);
+        quantity = getAccountBalance(clientFutures) * tradePercentage;
+        quantity *= leverage;
+        quantity /= price;
+        String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
+        log.info("position quantity = {}", positionQuantity);
     }
 
     @Override
@@ -103,6 +109,7 @@ public class TradeImpl implements Trade {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
 
+        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
             log.info("position {} is already closed", symbol);
             return;
@@ -118,7 +125,6 @@ public class TradeImpl implements Trade {
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
             sendOrder(positionQuantity, clientFutures);
         }
-        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
     @Override

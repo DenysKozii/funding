@@ -10,6 +10,8 @@ public interface Trade {
 
     void open(SyncRequestClient clientFutures);
 
+    void prepareOpen(SyncRequestClient clientFutures);
+
     void logOrder(OrderStatus orderStatus, Double accountBalance);
 
     void close(SyncRequestClient clientFutures);
