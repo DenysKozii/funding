@@ -29,10 +29,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 @Slf4j
@@ -192,6 +189,7 @@ public class TradeImpl implements Trade {
                     .build();
             logs.add(logDto);
         }
+        Collections.reverse(logs);
         return logs;
     }
 
