@@ -8,6 +8,7 @@ import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.trade.AccountInformation;
+import com.binance.client.model.trade.Order;
 import com.binance.client.model.trade.Position;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -116,7 +117,6 @@ public class TradeImpl implements Trade {
         }
 
         String positionQuantity = position.get().getPositionAmt().toString();
-        log.info("close {} position quantity = {}", symbol, positionQuantity);
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
@@ -125,14 +125,19 @@ public class TradeImpl implements Trade {
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
             sendOrder(positionQuantity, clientFutures);
         }
+        log.info("close {} position quantity = {}", symbol, positionQuantity);
     }
 
     @Override
     public void sendOrder(String positionQuantity, SyncRequestClient clientFutures) {
-        clientFutures.postOrder(
+        Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
+        log.info("order sent with price = {}", order.getPrice());
+        log.info("order sent with getExecutedQty = {}", order.getExecutedQty());
+        log.info("order sent with getCumQty = {}", order.getCumQty());
+        log.info("order sent with getOrigQty = {}", order.getOrigQty());
     }
 
     @Override
