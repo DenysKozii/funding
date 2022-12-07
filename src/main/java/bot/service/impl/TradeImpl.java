@@ -77,6 +77,10 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
+        if (Math.abs(rate) < tradeLimit) {
+            log.info("rate {} is lower than limit {}", rate, tradeLimit);
+            return;
+        }
         if (rate < 0) {
             orderSide = OrderSide.BUY;
             sendOrder(positionQuantity, clientFutures);
@@ -90,7 +94,7 @@ public class TradeImpl implements Trade {
     @Override
     public void prepareOpen(SyncRequestClient clientFutures) {
         if (Math.abs(rate) < tradeLimit) {
-            log.info("rate is lower than limit {}", tradeLimit);
+            log.info("rate {} is lower than limit {}", rate, tradeLimit);
             return;
         }
         try {
