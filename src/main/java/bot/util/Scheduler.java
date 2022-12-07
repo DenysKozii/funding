@@ -62,7 +62,7 @@ public class Scheduler {
         log.info("close finished");
     }
 
-    @Scheduled(cron = "55 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
     public void prepareOpen0() {
         prepareOpen();
     }
@@ -102,7 +102,7 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "55 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
     public void prepareOpen8() {
         prepareOpen();
     }
@@ -142,7 +142,7 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "55 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
     public void prepareOpen16() {
         prepareOpen();
     }
