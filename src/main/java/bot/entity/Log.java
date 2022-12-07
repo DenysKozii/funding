@@ -26,6 +26,8 @@ public class Log {
 
     Double price;
 
+    Double responsePrice;
+
     OrderStatus orderStatus;
 
     OrderSide orderSide;

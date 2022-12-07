@@ -48,6 +48,8 @@ public class TradeImpl implements Trade {
     @NonFinal
     Double price;
     @NonFinal
+    Double responsePrice;
+    @NonFinal
     Double quantity;
     @NonFinal
     String positionQuantity;
@@ -74,8 +76,8 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
-        logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
         if (Math.abs(rate) < tradeLimit) {
+            logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
             log.info("rate {} is lower than limit {}", rate, tradeLimit);
             return;
         }
@@ -86,6 +88,7 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
         }
+        logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
     }
 
     @Override
@@ -111,8 +114,8 @@ public class TradeImpl implements Trade {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
 
-        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
+            logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
             log.info("position {} is already closed", symbol);
             return;
         }
@@ -126,6 +129,7 @@ public class TradeImpl implements Trade {
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
             sendOrder(positionQuantity, clientFutures);
         }
+        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         log.info("close {} position quantity = {}", symbol, positionQuantity);
     }
 
@@ -135,6 +139,7 @@ public class TradeImpl implements Trade {
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
+        responsePrice = order.getPrice().doubleValue();
         log.info("order sent with price = {}", order.getPrice());
         log.info("order sent with getExecutedQty = {}", order.getExecutedQty());
         log.info("order sent with getCumQty = {}", order.getCumQty());
@@ -183,6 +188,7 @@ public class TradeImpl implements Trade {
                     .rate(log.getRate())
                     .orderStatus(log.getOrderStatus())
                     .price(log.getPrice())
+                    .responsePrice(log.getResponsePrice())
                     .accountBalance(log.getAccountBalance())
                     .orderSide(log.getOrderSide())
                     .changePercents(OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice())
@@ -203,6 +209,7 @@ public class TradeImpl implements Trade {
                 .symbol(symbol)
                 .rate(rate)
                 .price(price)
+                .responsePrice(responsePrice)
                 .orderStatus(orderStatus)
                 .accountBalance(accountBalance)
                 .orderSide(orderSide)

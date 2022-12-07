@@ -23,6 +23,8 @@ public class LogDto {
 
     Double price;
 
+    Double responsePrice;
+
     OrderStatus orderStatus;
 
     OrderSide orderSide;
