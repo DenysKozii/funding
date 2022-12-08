@@ -142,9 +142,10 @@ public class TradeImpl implements Trade {
 
     @Override
     public void sendOrder(String positionQuantity, OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
+        double sellPrice = responsePrice - responsePrice * Math.abs(rate) / 2;
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, orderType, timeInForce, positionQuantity,
-                OrderType.LIMIT.equals(orderType) ? responsePrice.toString() : null,
+                OrderType.LIMIT.equals(orderType) ? Double.toString(sellPrice) : null,
                 null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
