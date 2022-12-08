@@ -29,6 +29,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -142,7 +144,13 @@ public class TradeImpl implements Trade {
 
     @Override
     public void sendOrder(String positionQuantity, OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
-        double sellPrice = responsePrice - responsePrice * Math.abs(rate) / 2;
+        double sellPrice = 0;
+        if (OrderType.LIMIT.equals(orderType)){
+            int round = Double.toString(responsePrice).split("\\.")[1].length();
+            log.info("round for {} = {}", responsePrice, round);
+            sellPrice = new BigDecimal(responsePrice - responsePrice * Math.abs(rate) / 2).setScale(round, RoundingMode.HALF_EVEN).doubleValue();
+            log.info("sell price = {}", sellPrice);
+        }
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, orderType, timeInForce, positionQuantity,
                 OrderType.LIMIT.equals(orderType) ? Double.toString(sellPrice) : null,
@@ -150,7 +158,6 @@ public class TradeImpl implements Trade {
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
         log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
-        log.info("{} order sent with executed quantity = {}", symbol, order.getExecutedQty());
     }
 
     @Override
