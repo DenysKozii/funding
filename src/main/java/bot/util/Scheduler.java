@@ -57,22 +57,22 @@ public class Scheduler {
         log.info("close finished");
     }
 
-    @Scheduled(cron = "58 41 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "58 46 15 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
 
-    @Scheduled(cron = "1 42 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 47 15 * * *", zone = "GMT+0")
     public void close0() {
         close(OrderType.LIMIT, TimeInForce.GTC);
     }
 
-    @Scheduled(cron = "7 42 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "7 47 15 * * *", zone = "GMT+0")
     public void close06() {
         close(OrderType.MARKET, null);
     }
 
-    @Scheduled(cron = "10 42 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "10 47 15 * * *", zone = "GMT+0")
     public void close010() {
         close(OrderType.MARKET, null);
     }

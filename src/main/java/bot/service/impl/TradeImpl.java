@@ -144,7 +144,8 @@ public class TradeImpl implements Trade {
     public void sendOrder(String positionQuantity, OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, orderType, timeInForce, positionQuantity,
-                responsePrice.toString(), null, null, null, null, null, null, null, null,
+                OrderType.LIMIT.equals(orderType) ? responsePrice.toString() : null,
+                null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
         log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
