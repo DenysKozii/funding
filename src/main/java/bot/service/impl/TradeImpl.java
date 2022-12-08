@@ -106,10 +106,10 @@ public class TradeImpl implements Trade {
         try {
             if (rate < 0) {
                 orderSide = OrderSide.BUY;
-                sendOpenOrder(positionQuantity, clientFutures);
+                sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
             } else {
                 orderSide = OrderSide.SELL;
-                sendOpenOrder(positionQuantity, clientFutures);
+                sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
             }
         } catch (BinanceApiException binanceApiException) {
             logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
@@ -118,7 +118,7 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public void close(SyncRequestClient clientFutures) {
+    public void close(OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
 
@@ -131,30 +131,19 @@ public class TradeImpl implements Trade {
         String positionQuantity = position.get().getPositionAmt().toString();
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
-            sendCloseOrder(positionQuantity, clientFutures);
+            sendOrder(positionQuantity, orderType, timeInForce, clientFutures);
         } else {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
-            sendCloseOrder(positionQuantity, clientFutures);
+            sendOrder(positionQuantity, orderType, timeInForce, clientFutures);
         }
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
     @Override
-    public void sendOpenOrder(String positionQuantity, SyncRequestClient clientFutures) {
+    public void sendOrder(String positionQuantity, OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
-                symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
-                null, null, null, null, null, null, null, null, null,
-                NewOrderRespType.RESULT);
-        responsePrice = order.getAvgPrice().doubleValue();
-        log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
-        log.info("{} order sent with executed quantity = {}", symbol, order.getExecutedQty());
-    }
-
-    @Override
-    public void sendCloseOrder(String positionQuantity, SyncRequestClient clientFutures) {
-        Order order = clientFutures.postOrder(
-                symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                symbol, orderSide, PositionSide.BOTH, orderType, timeInForce, positionQuantity,
                 responsePrice.toString(), null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
