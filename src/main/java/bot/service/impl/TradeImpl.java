@@ -7,6 +7,7 @@ import bot.entity.Log;
 import bot.repository.LogRepository;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
+import com.binance.client.exception.BinanceApiException;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Order;
@@ -78,32 +79,16 @@ public class TradeImpl implements Trade {
         this.symbol = symbol;
         this.dateFormatPattern = dateFormatPattern;
         this.logRepository = logRepository;
-        this.groupId = logRepository.findAll().get((int)logRepository.count() - 1).getGroupId();
+        this.groupId = logRepository.findAll().get((int) logRepository.count() - 1).getGroupId();
     }
 
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
         groupId++;
-        if (Math.abs(rate) < tradeLimit) {
-            logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
-            log.info("rate {} is lower than limit {}", rate, tradeLimit);
-            return;
-        }
-        if (rate < 0) {
-            orderSide = OrderSide.BUY;
-            sendOrder(positionQuantity, clientFutures);
-        } else {
-            orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity, clientFutures);
-        }
-        logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
-    }
-
-    @Override
-    public void prepareOpen(SyncRequestClient clientFutures) {
         responsePrice = 0.0;
         if (Math.abs(rate) < tradeLimit) {
+            logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
             log.info("rate {} is lower than limit {}", rate, tradeLimit);
             return;
         }
@@ -117,6 +102,19 @@ public class TradeImpl implements Trade {
         quantity /= price;
         String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
+        log.info("position price = {}", price);
+        try {
+            if (rate < 0) {
+                orderSide = OrderSide.BUY;
+                sendOpenOrder(positionQuantity, clientFutures);
+            } else {
+                orderSide = OrderSide.SELL;
+                sendOpenOrder(positionQuantity, clientFutures);
+            }
+        } catch (BinanceApiException binanceApiException) {
+            logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
+            log.error(binanceApiException.getMessage());
+        }
     }
 
     @Override
@@ -133,27 +131,35 @@ public class TradeImpl implements Trade {
         String positionQuantity = position.get().getPositionAmt().toString();
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity, clientFutures);
+            sendCloseOrder(positionQuantity, clientFutures);
         } else {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
-            sendOrder(positionQuantity, clientFutures);
+            sendCloseOrder(positionQuantity, clientFutures);
         }
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
-        log.info("close {} position quantity = {}", symbol, positionQuantity);
     }
 
     @Override
-    public void sendOrder(String positionQuantity, SyncRequestClient clientFutures) {
+    public void sendOpenOrder(String positionQuantity, SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
-        responsePrice = order.getPrice().doubleValue();
-        log.info("order sent with price = {}", order.getPrice());
-        log.info("order sent with getExecutedQty = {}", order.getExecutedQty());
-        log.info("order sent with getCumQty = {}", order.getCumQty());
-        log.info("order sent with getOrigQty = {}", order.getOrigQty());
+        responsePrice = order.getAvgPrice().doubleValue();
+        log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
+        log.info("{} order sent with executed quantity = {}", symbol, order.getExecutedQty());
+    }
+
+    @Override
+    public void sendCloseOrder(String positionQuantity, SyncRequestClient clientFutures) {
+        Order order = clientFutures.postOrder(
+                symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                responsePrice.toString(), null, null, null, null, null, null, null, null,
+                NewOrderRespType.RESULT);
+        responsePrice = order.getAvgPrice().doubleValue();
+        log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
+        log.info("{} order sent with executed quantity = {}", symbol, order.getExecutedQty());
     }
 
     @Override

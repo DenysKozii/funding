@@ -11,13 +11,13 @@ public interface Trade {
 
     void open(SyncRequestClient clientFutures);
 
-    void prepareOpen(SyncRequestClient clientFutures);
-
     void logOrder(OrderStatus orderStatus, Double accountBalance);
 
     void close(SyncRequestClient clientFutures);
 
-    void sendOrder(String positionQuantity, SyncRequestClient clientFutures);
+    void sendOpenOrder(String positionQuantity, SyncRequestClient clientFutures);
+
+    void sendCloseOrder(String positionQuantity, SyncRequestClient clientFutures);
 
     void updateFunding();
 

@@ -43,13 +43,6 @@ public class Scheduler {
         trade.updateFunding();
     }
 
-    private void prepareOpen() {
-        trade.updateFunding();
-        log.info("prepare open started");
-        connection.getClientFutures().forEach(trade::prepareOpen);
-        log.info("prepare open finished");
-    }
-
     private void open() {
         log.info("open started");
         connection.getClientFutures().forEach(trade::open);
@@ -62,17 +55,12 @@ public class Scheduler {
         log.info("close finished");
     }
 
-    @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
-    public void prepareOpen0() {
-        prepareOpen();
-    }
-
     @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
 
-    @Scheduled(cron = "2 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 0 0 * * *", zone = "GMT+0")
     public void close05() {
         close();
     }
@@ -102,17 +90,12 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
-    public void prepareOpen8() {
-        prepareOpen();
-    }
-
     @Scheduled(cron = "58 59 7 * * *", zone = "GMT+0")
     public void open8() {
         open();
     }
 
-    @Scheduled(cron = "2 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 0 8 * * *", zone = "GMT+0")
     public void close8() {
         close();
     }
@@ -142,17 +125,12 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
-    public void prepareOpen16() {
-        prepareOpen();
-    }
-
     @Scheduled(cron = "58 59 15 * * *", zone = "GMT+0")
     public void open16() {
         open();
     }
 
-    @Scheduled(cron = "2 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 0 16 * * *", zone = "GMT+0")
     public void close16() {
         close();
     }
