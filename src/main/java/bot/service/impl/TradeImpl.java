@@ -106,7 +106,7 @@ public class TradeImpl implements Trade {
         log.info("position quantity = {}", positionQuantity);
         log.info("position price = {}", price);
         try {
-            if (rate > 0) {
+            if (rate < 0) {
                 orderSide = OrderSide.BUY;
                 sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
             } else {
@@ -117,6 +117,7 @@ public class TradeImpl implements Trade {
             logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
             log.error(binanceApiException.getMessage());
         }
+        logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
     }
 
     @Override
@@ -148,7 +149,7 @@ public class TradeImpl implements Trade {
         if (OrderType.LIMIT.equals(orderType)){
             int round = Double.toString(responsePrice).split("\\.")[1].length();
             log.info("round for {} = {}", responsePrice, round);
-            sellPrice = new BigDecimal(responsePrice - responsePrice * Math.abs(rate)).setScale(round, RoundingMode.HALF_EVEN).doubleValue();
+            sellPrice = new BigDecimal(responsePrice - responsePrice * Math.abs(rate) / 1.5).setScale(round, RoundingMode.HALF_EVEN).doubleValue();
             log.info("sell price = {}", sellPrice);
         }
         Order order = clientFutures.postOrder(
