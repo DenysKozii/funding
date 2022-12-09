@@ -64,7 +64,7 @@ public class Scheduler {
 
     @Scheduled(cron = "1 0 0 * * *", zone = "GMT+0")
     public void close0() {
-        close(OrderType.LIMIT, TimeInForce.GTC);
+        close(OrderType.LIMIT, TimeInForce.IOC);
     }
 
     @Scheduled(cron = "7 0 0 * * *", zone = "GMT+0")
@@ -99,7 +99,7 @@ public class Scheduler {
 
     @Scheduled(cron = "1 0 8 * * *", zone = "GMT+0")
     public void close8() {
-        close(OrderType.LIMIT, TimeInForce.GTC);
+        close(OrderType.LIMIT, TimeInForce.IOC);
     }
 
     @Scheduled(cron = "7 0 8 * * *", zone = "GMT+0")
@@ -134,7 +134,7 @@ public class Scheduler {
 
     @Scheduled(cron = "1 0 16 * * *", zone = "GMT+0")
     public void close16() {
-        close(OrderType.LIMIT, TimeInForce.GTC);
+        close(OrderType.LIMIT, TimeInForce.IOC);
     }
 
     @Scheduled(cron = "7 0 16 * * *", zone = "GMT+0")
