@@ -7,7 +7,6 @@ import bot.entity.Log;
 import bot.repository.LogRepository;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
-import com.binance.client.exception.BinanceApiException;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Order;
@@ -105,19 +104,14 @@ public class TradeImpl implements Trade {
         String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
         log.info("position price = {}", price);
-        try {
-            if (rate < 0) {
-                orderSide = OrderSide.BUY;
-                sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
-            } else {
-                orderSide = OrderSide.SELL;
-                sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
-            }
-        } catch (BinanceApiException binanceApiException) {
-            logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
-            log.error(binanceApiException.getMessage());
-        }
         logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
+        if (rate < 0) {
+            orderSide = OrderSide.BUY;
+            sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
+        } else {
+            orderSide = OrderSide.SELL;
+            sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
+        }
     }
 
     @Override
@@ -146,7 +140,7 @@ public class TradeImpl implements Trade {
     @Override
     public void sendOrder(String positionQuantity, OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
         double sellPrice = 0;
-        if (OrderType.LIMIT.equals(orderType)){
+        if (OrderType.LIMIT.equals(orderType)) {
             int round = Double.toString(responsePrice).split("\\.")[1].length();
             log.info("round for {} = {}", responsePrice, round);
             sellPrice = new BigDecimal(responsePrice - responsePrice * Math.abs(rate) / 1.5).setScale(round, RoundingMode.HALF_EVEN).doubleValue();
