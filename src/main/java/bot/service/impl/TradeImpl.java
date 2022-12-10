@@ -80,7 +80,11 @@ public class TradeImpl implements Trade {
         this.symbol = symbol;
         this.dateFormatPattern = dateFormatPattern;
         this.logRepository = logRepository;
-        this.groupId = logRepository.findAll().get((int) logRepository.count() - 1).getGroupId();
+        if (logRepository.count() > 0) {
+            this.groupId = logRepository.findAll().get((int) logRepository.count() - 1).getGroupId();
+        } else {
+            this.groupId = 0L;
+        }
     }
 
     @Override
