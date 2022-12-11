@@ -1,9 +1,8 @@
 package bot.util;
 
+import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
-import com.binance.client.model.enums.OrderType;
-import com.binance.client.model.enums.TimeInForce;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +50,9 @@ public class Scheduler {
         log.info("open finished");
     }
 
-    private void close(OrderType orderType, TimeInForce timeInForce) {
+    private void close() {
         log.info("close started");
-        connection.getClientFutures().forEach(client -> trade.close(orderType, timeInForce, client));
+        connection.getClientFutures().forEach(trade::close);
         log.info("close finished");
     }
 
@@ -62,24 +61,29 @@ public class Scheduler {
         open();
     }
 
+    @Scheduled(cron = "5 0 0 * * *", zone = "GMT+0")
+    public void close05() {
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
     public void close015() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "30 0 0 * * *", zone = "GMT+0")
     public void close030() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "59 0 0 * * *", zone = "GMT+0")
     public void close059() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
@@ -87,24 +91,29 @@ public class Scheduler {
         open();
     }
 
+    @Scheduled(cron = "5 0 8 * * *", zone = "GMT+0")
+    public void close85() {
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
     public void close815() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "30 0 8 * * *", zone = "GMT+0")
     public void close830() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "59 0 8 * * *", zone = "GMT+0")
     public void close859() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
@@ -112,23 +121,28 @@ public class Scheduler {
         open();
     }
 
+    @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
+    public void close165() {
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
+    }
+
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
     public void close1610() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")
     public void close1615() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "30 0 16 * * *", zone = "GMT+0")
     public void close1630() {
-        close(OrderType.MARKET, null);
+        close();
     }
 
     @Scheduled(cron = "59 0 16 * * *", zone = "GMT+0")
     public void close1659() {
-        close(OrderType.MARKET, null);
+        close();
     }
 }

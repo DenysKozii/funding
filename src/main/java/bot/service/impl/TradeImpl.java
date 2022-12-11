@@ -28,8 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -111,15 +109,15 @@ public class TradeImpl implements Trade {
         logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
         if (rate < 0) {
             orderSide = OrderSide.BUY;
-            sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
+            sendOrder(positionQuantity, clientFutures);
         } else {
             orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity, OrderType.MARKET, null, clientFutures);
+            sendOrder(positionQuantity, clientFutures);
         }
     }
 
     @Override
-    public void close(OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
+    public void close(SyncRequestClient clientFutures) {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
 
@@ -132,28 +130,20 @@ public class TradeImpl implements Trade {
         String positionQuantity = position.get().getPositionAmt().toString();
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity, orderType, timeInForce, clientFutures);
+            sendOrder(positionQuantity, clientFutures);
         } else {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
-            sendOrder(positionQuantity, orderType, timeInForce, clientFutures);
+            sendOrder(positionQuantity, clientFutures);
         }
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
     @Override
-    public void sendOrder(String positionQuantity, OrderType orderType, TimeInForce timeInForce, SyncRequestClient clientFutures) {
-        double sellPrice = 0;
-        if (OrderType.LIMIT.equals(orderType)) {
-            int round = Double.toString(responsePrice).split("\\.")[1].length();
-            log.info("round for {} = {}", responsePrice, round);
-            sellPrice = new BigDecimal(responsePrice - responsePrice * Math.abs(rate) / 1.5).setScale(round, RoundingMode.HALF_EVEN).doubleValue();
-            log.info("sell price = {}", sellPrice);
-        }
+    public void sendOrder(String positionQuantity, SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
-                symbol, orderSide, PositionSide.BOTH, orderType, timeInForce, positionQuantity,
-                OrderType.LIMIT.equals(orderType) ? Double.toString(sellPrice) : null,
-                null, null, null, null, null, null, null, null,
+                symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
+                null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
         log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
