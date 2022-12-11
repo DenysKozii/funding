@@ -106,7 +106,7 @@ public class TradeImpl implements Trade {
         String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
         log.info("position quantity = {}", positionQuantity);
         log.info("position price = {}", price);
-        logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
+        double accountBalance = getAccountBalance(clientFutures);
         if (rate < 0) {
             orderSide = OrderSide.BUY;
             sendOrder(positionQuantity, clientFutures);
@@ -114,6 +114,7 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             sendOrder(positionQuantity, clientFutures);
         }
+        logOrder(OrderStatus.OPEN, accountBalance);
     }
 
     @Override
@@ -181,7 +182,7 @@ public class TradeImpl implements Trade {
         OrderSide openOrderSide = OrderSide.BUY;
         for (Log log : logRepository.findAllByGroupId(groupId)) {
             if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
-                openPrice = log.getPrice();
+                openPrice = log.getResponsePrice();
                 openOrderSide = log.getOrderSide();
             }
             LogDto logDto = LogDto.builder()
