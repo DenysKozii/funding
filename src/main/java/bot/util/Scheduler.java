@@ -62,16 +62,6 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "1 0 0 * * *", zone = "GMT+0")
-    public void close0() {
-        close(OrderType.MARKET, null);
-    }
-
-    @Scheduled(cron = "7 0 0 * * *", zone = "GMT+0")
-    public void close06() {
-        close(OrderType.MARKET, null);
-    }
-
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
         close(OrderType.MARKET, null);
@@ -97,16 +87,6 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "1 0 8 * * *", zone = "GMT+0")
-    public void close8() {
-        close(OrderType.MARKET, null);
-    }
-
-    @Scheduled(cron = "7 0 8 * * *", zone = "GMT+0")
-    public void close87() {
-        close(OrderType.MARKET, null);
-    }
-
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
         close(OrderType.MARKET, null);
@@ -130,16 +110,6 @@ public class Scheduler {
     @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
     public void open16() {
         open();
-    }
-
-    @Scheduled(cron = "1 0 16 * * *", zone = "GMT+0")
-    public void close16() {
-        close(OrderType.MARKET, null);
-    }
-
-    @Scheduled(cron = "7 0 16 * * *", zone = "GMT+0")
-    public void close167() {
-        close(OrderType.MARKET, null);
     }
 
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
