@@ -182,7 +182,7 @@ public class TradeImpl implements Trade {
         OrderSide openOrderSide = OrderSide.BUY;
         for (Log log : logRepository.findAllByGroupId(groupId)) {
             if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
-                openPrice = log.getResponsePrice();
+                openPrice = log.getResponsePrice() == 0 ? log.getPrice() : log.getResponsePrice();
                 openOrderSide = log.getOrderSide();
             }
             LogDto logDto = LogDto.builder()
