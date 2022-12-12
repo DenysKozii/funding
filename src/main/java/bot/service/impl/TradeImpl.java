@@ -179,11 +179,13 @@ public class TradeImpl implements Trade {
     public List<LogDto> getLogsByGroupId(Long groupId) {
         List<LogDto> logs = new ArrayList<>();
         double openPrice = 0;
+        double openAccountBalance = 0;
         OrderSide openOrderSide = OrderSide.BUY;
         for (Log log : logRepository.findAllByGroupId(groupId)) {
             if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
                 openPrice = log.getResponsePrice() == 0 ? log.getPrice() : log.getResponsePrice();
                 openOrderSide = log.getOrderSide();
+                openAccountBalance = log.getAccountBalance();
             }
             LogDto logDto = LogDto.builder()
                     .groupId(log.getGroupId())
@@ -196,7 +198,8 @@ public class TradeImpl implements Trade {
                     .responsePrice(log.getResponsePrice())
                     .accountBalance(log.getAccountBalance())
                     .orderSide(log.getOrderSide())
-                    .changePercents(OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice())
+                    .priceChangePercent(OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice())
+                    .accountBalanceChangePercent(log.getAccountBalance() / openAccountBalance)
                     .build();
             logs.add(logDto);
         }

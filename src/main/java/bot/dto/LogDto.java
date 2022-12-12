@@ -31,8 +31,10 @@ public class LogDto {
 
     OrderSide orderSide;
 
-    Double changePercents;
+    Double priceChangePercent;
 
     Double accountBalance;
+
+    Double accountBalanceChangePercent;
 
 }
