@@ -1,6 +1,5 @@
 package bot.util;
 
-import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -63,7 +62,7 @@ public class Scheduler {
 
     @Scheduled(cron = "5 0 0 * * *", zone = "GMT+0")
     public void close05() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
@@ -93,7 +92,7 @@ public class Scheduler {
 
     @Scheduled(cron = "5 0 8 * * *", zone = "GMT+0")
     public void close85() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
@@ -123,7 +122,7 @@ public class Scheduler {
 
     @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
     public void close165() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
