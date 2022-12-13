@@ -65,6 +65,11 @@ public class Scheduler {
         close();
     }
 
+    @Scheduled(cron = "8 0 0 * * *", zone = "GMT+0")
+    public void close08() {
+        close();
+    }
+
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
         close();
@@ -95,6 +100,11 @@ public class Scheduler {
         close();
     }
 
+    @Scheduled(cron = "8 0 8 * * *", zone = "GMT+0")
+    public void close88() {
+        close();
+    }
+
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
         close();
@@ -122,6 +132,11 @@ public class Scheduler {
 
     @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
     public void close165() {
+        close();
+    }
+
+    @Scheduled(cron = "8 0 16 * * *", zone = "GMT+0")
+    public void close168() {
         close();
     }
 
