@@ -107,7 +107,7 @@ public class TradeImpl implements Trade {
         log.info("position quantity = {}", positionQuantity);
         log.info("position price = {}", price);
         double accountBalance = getAccountBalance(clientFutures);
-        if (rate < 0) {
+        if (rate > 0) {
             orderSide = OrderSide.BUY;
             sendOrder(positionQuantity, clientFutures);
         } else {
@@ -180,28 +180,53 @@ public class TradeImpl implements Trade {
         List<LogDto> logs = new ArrayList<>();
         double openPrice = 0;
         double openAccountBalance = 0;
+        double changeBalancePercent;
+        double mean10 = 0;
+        double mean15 = 0;
+        double mean30 = 0;
+        double mean59 = 0;
+        double mean = 0;
         OrderSide openOrderSide = OrderSide.BUY;
-        for (Log log : logRepository.findAllByGroupId(groupId)) {
+        int i = 0;
+        for (Log log : logRepository.findAll()) {
             if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
                 openPrice = log.getResponsePrice() == 0 ? log.getPrice() : log.getResponsePrice();
                 openOrderSide = log.getOrderSide();
                 openAccountBalance = log.getAccountBalance();
             }
-            LogDto logDto = LogDto.builder()
-                    .groupId(log.getGroupId())
-                    .date(log.getDate())
-                    .symbol(log.getSymbol())
-                    .name("Denys")
-                    .rate(log.getRate())
-                    .orderStatus(log.getOrderStatus())
-                    .price(log.getPrice())
-                    .responsePrice(log.getResponsePrice())
-                    .accountBalance(log.getAccountBalance())
-                    .orderSide(log.getOrderSide())
-                    .priceChangePercent(OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice())
-                    .accountBalanceChangePercent(log.getAccountBalance() / openAccountBalance)
-                    .build();
-            logs.add(logDto);
+            changeBalancePercent = OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice();
+            if (i % 6 == 2){
+                mean10 += changeBalancePercent;
+                mean = mean10 / ((int) (i/6 + 1));
+            } else if (i % 6 == 3){
+                mean15 += changeBalancePercent;
+                mean = mean15 / ((int) (i/6 + 1));
+            } else if (i % 6 == 4){
+                mean30 += changeBalancePercent;
+                mean = mean30 / ((int) (i/6 + 1));
+            } else if (i % 6 == 5){
+                mean59 += changeBalancePercent;
+                mean = mean59 / ((int) (i/6 + 1));
+            }
+            if (Objects.equals(log.getGroupId(), groupId)) {
+                LogDto logDto = LogDto.builder()
+                        .groupId(log.getGroupId())
+                        .date(log.getDate())
+                        .symbol(log.getSymbol())
+                        .name("Denys")
+                        .rate(log.getRate())
+                        .orderStatus(log.getOrderStatus())
+                        .price(log.getPrice())
+                        .responsePrice(log.getResponsePrice())
+                        .accountBalance(log.getAccountBalance())
+                        .orderSide(log.getOrderSide())
+                        .priceChangePercent(changeBalancePercent)
+                        .meanChangePercent(mean)
+                        .accountBalanceChangePercent(log.getAccountBalance() / openAccountBalance)
+                        .build();
+                logs.add(logDto);
+            }
+            i++;
         }
         return logs;
     }
