@@ -1,6 +1,5 @@
 package bot.util;
 
-import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -56,19 +55,24 @@ public class Scheduler {
         log.info("close finished");
     }
 
-    @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
 
+    @Scheduled(cron = "2 0 0 * * *", zone = "GMT+0")
+    public void close0() {
+        close();
+    }
+
     @Scheduled(cron = "5 0 0 * * *", zone = "GMT+0")
     public void close05() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
@@ -86,19 +90,24 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "58 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
     public void open8() {
         open();
     }
 
+    @Scheduled(cron = "2 0 8 * * *", zone = "GMT+0")
+    public void close8() {
+        close();
+    }
+
     @Scheduled(cron = "5 0 8 * * *", zone = "GMT+0")
     public void close85() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
@@ -116,19 +125,24 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "58 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
     public void open16() {
         open();
     }
 
+    @Scheduled(cron = "2 0 16 * * *", zone = "GMT+0")
+    public void close16() {
+        close();
+    }
+
     @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
     public void close165() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
     public void close1610() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")
