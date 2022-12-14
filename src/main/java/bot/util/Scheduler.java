@@ -66,11 +66,6 @@ public class Scheduler {
         trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
-    @Scheduled(cron = "8 0 0 * * *", zone = "GMT+0")
-    public void close08() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
-    }
-
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
         trade.logOrder(OrderStatus.CLOSE, 0.0);
@@ -101,11 +96,6 @@ public class Scheduler {
         trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
-    @Scheduled(cron = "8 0 8 * * *", zone = "GMT+0")
-    public void close88() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
-    }
-
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
         trade.logOrder(OrderStatus.CLOSE, 0.0);
@@ -133,11 +123,6 @@ public class Scheduler {
 
     @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
     public void close165() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
-    }
-
-    @Scheduled(cron = "8 0 16 * * *", zone = "GMT+0")
-    public void close168() {
         trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
