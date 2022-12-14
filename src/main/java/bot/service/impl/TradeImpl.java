@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -136,6 +138,40 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
             sendOrder(positionQuantity, clientFutures);
+        }
+        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
+    }
+
+    @Override
+    public void closeLimit(SyncRequestClient clientFutures) {
+        Optional<Position> position = clientFutures.getAccountInformation().getPositions()
+                .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
+        String positionQuantity = position.get().getPositionAmt().toString();
+        if (OrderSide.BUY.equals(orderSide)) {
+            orderSide = OrderSide.SELL;
+            int round = Double.toString(responsePrice).split("\\.")[1].length();
+            log.info("round for {} = {}", responsePrice, round);
+            BigDecimal price = new BigDecimal(responsePrice * (1 - rate + 0.001)).setScale(round, RoundingMode.HALF_EVEN);
+            log.info("sell price = {}", price);
+            Order order = clientFutures.postOrder(
+                    symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                    price.toString(), null, null, null, null, null, null, null, null,
+                    NewOrderRespType.RESULT);
+            responsePrice = order.getAvgPrice().doubleValue();
+            log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
+        } else {
+            orderSide = OrderSide.BUY;
+            int round = Double.toString(responsePrice).split("\\.")[1].length();
+            log.info("round for {} = {}", responsePrice, round);
+            BigDecimal price = new BigDecimal(responsePrice * (1 + rate - 0.001)).setScale(round, RoundingMode.HALF_EVEN);
+            log.info("sell price = {}", price);
+            positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
+            Order order = clientFutures.postOrder(
+                    symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                    price.toString(), null, null, null, null, null, null, null, null,
+                    NewOrderRespType.RESULT);
+            responsePrice = order.getAvgPrice().doubleValue();
+            log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
         }
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }

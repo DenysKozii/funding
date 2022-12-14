@@ -1,5 +1,6 @@
 package bot.util;
 
+import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -55,6 +56,12 @@ public class Scheduler {
         log.info("close finished");
     }
 
+    private void closeLimit() {
+        log.info("close limit started");
+        connection.getClientFutures().forEach(trade::closeLimit);
+        log.info("close limit finished");
+    }
+
     @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
@@ -62,17 +69,17 @@ public class Scheduler {
 
     @Scheduled(cron = "2 0 0 * * *", zone = "GMT+0")
     public void close0() {
-        close();
+        closeLimit();
     }
 
     @Scheduled(cron = "5 0 0 * * *", zone = "GMT+0")
     public void close05() {
-        close();
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
-        close();
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
     @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
@@ -97,17 +104,17 @@ public class Scheduler {
 
     @Scheduled(cron = "2 0 8 * * *", zone = "GMT+0")
     public void close8() {
-        close();
+        closeLimit();
     }
 
     @Scheduled(cron = "5 0 8 * * *", zone = "GMT+0")
     public void close85() {
-        close();
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
-        close();
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
     @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
@@ -132,17 +139,17 @@ public class Scheduler {
 
     @Scheduled(cron = "2 0 16 * * *", zone = "GMT+0")
     public void close16() {
-        close();
+        closeLimit();
     }
 
     @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
     public void close165() {
-        close();
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
     public void close1610() {
-        close();
+        trade.logOrder(OrderStatus.CLOSE, 0.0);
     }
 
     @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")

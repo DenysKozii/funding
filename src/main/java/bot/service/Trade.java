@@ -15,6 +15,8 @@ public interface Trade {
 
     void close(SyncRequestClient clientFutures);
 
+    void closeLimit(SyncRequestClient clientFutures);
+
     void sendOrder(String positionQuantity, SyncRequestClient clientFutures);
 
     void updateFunding();
