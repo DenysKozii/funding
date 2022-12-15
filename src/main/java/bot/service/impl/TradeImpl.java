@@ -90,6 +90,7 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
+        updateFunding();
         groupId++;
         responsePrice = 0.0;
         if (Math.abs(rate) < tradeLimit) {
@@ -102,7 +103,7 @@ public class TradeImpl implements Trade {
         } catch (Exception ignored) {
         }
         clientFutures.changeInitialLeverage(symbol, leverage);
-        quantity = getAccountBalance(clientFutures) * tradePercentage;
+        quantity = 10.0;
         quantity *= leverage;
         quantity /= price;
         String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
@@ -201,6 +202,22 @@ public class TradeImpl implements Trade {
                 log.info("symbol = {}", symbol);
                 log.info("rate = {}", rate);
                 log.info("price = {}", price);
+            }
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public void logFunding() {
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            HttpUriRequest request = new HttpGet(websocketUrl);
+            HttpResponse response = client.execute(request);
+            var bufReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            String line;
+            while ((line = bufReader.readLine()) != null) {
+                log.info("symbol = {}", line.split(";")[0]);
+                log.info("rate = {}", Double.parseDouble(line.split(";")[1]));
+                log.info("price = {}", Double.parseDouble(line.split(";")[2]));
             }
         }
     }

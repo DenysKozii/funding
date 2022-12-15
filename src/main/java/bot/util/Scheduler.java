@@ -41,7 +41,7 @@ public class Scheduler {
             HttpUriRequest request = new HttpGet(herokuUrl);
             client.execute(request);
         }
-        trade.updateFunding();
+        trade.logFunding();
     }
 
     private void open() {

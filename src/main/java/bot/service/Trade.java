@@ -21,6 +21,8 @@ public interface Trade {
 
     void updateFunding();
 
+    void logFunding();
+
     double getAccountBalance(SyncRequestClient clientFutures);
 
     List<LogDto> getLogsByGroupId(Long groupId);
