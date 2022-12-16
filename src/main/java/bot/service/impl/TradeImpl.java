@@ -103,7 +103,7 @@ public class TradeImpl implements Trade {
         } catch (Exception ignored) {
         }
         clientFutures.changeInitialLeverage(symbol, leverage);
-        quantity = 10.0;
+        quantity = 20.0;
         quantity *= leverage;
         quantity /= price;
         String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
@@ -152,7 +152,7 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.SELL;
             int round = Double.toString(responsePrice).split("\\.")[1].length();
             log.info("round for {} = {}", responsePrice, round);
-            BigDecimal price = new BigDecimal(responsePrice * (1 - rate + 0.0015)).setScale(round, RoundingMode.HALF_EVEN);
+            BigDecimal price = new BigDecimal(responsePrice * (1 - rate + 0.001)).setScale(round, RoundingMode.HALF_EVEN);
             log.info("sell price = {}", price);
             Order order = clientFutures.postOrder(
                     symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
@@ -164,7 +164,7 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.BUY;
             int round = Double.toString(responsePrice).split("\\.")[1].length();
             log.info("round for {} = {}", responsePrice, round);
-            BigDecimal price = new BigDecimal(responsePrice * (1 + rate - 0.0015)).setScale(round, RoundingMode.HALF_EVEN);
+            BigDecimal price = new BigDecimal(responsePrice * (1 + rate - 0.001)).setScale(round, RoundingMode.HALF_EVEN);
             log.info("sell price = {}", price);
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
             Order order = clientFutures.postOrder(
