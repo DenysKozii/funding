@@ -150,7 +150,7 @@ public class TradeImpl implements Trade {
                         .setScale(round, RoundingMode.HALF_EVEN)
                         .doubleValue();
             }
-            log.info("sell price = {}", price);
+            log.info("limit sell price = {}", price);
             sendLimitOrder(positionQuantity, price.toString(), clientFutures);
             logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
@@ -175,7 +175,6 @@ public class TradeImpl implements Trade {
                 price, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
-        log.info("{} order sent with executed avg price = {}", symbol, responsePrice);
     }
 
     @Override
