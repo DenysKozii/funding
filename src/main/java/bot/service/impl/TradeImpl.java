@@ -15,7 +15,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -38,35 +37,25 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TradeImpl implements Trade {
 
-    String websocketUrl;
-    Double tradePercentage;
-    String dateFormatPattern;
-    Double tradeLimit;
-    @NonFinal
-    Double profitLimit;
-    @NonFinal
-    Integer leverage;
-    @NonFinal
-    String symbol;
-    @NonFinal
-    Double rate;
-    @NonFinal
-    Double price;
-    @NonFinal
-    Long groupId;
-    @NonFinal
-    Double responsePrice;
-    @NonFinal
-    Double quantity;
-    @NonFinal
-    String positionQuantity;
-    @NonFinal
-    OrderSide orderSide;
+    final LogRepository logRepository;
 
-    LogRepository logRepository;
+    final String websocketUrl;
+    final Double tradePercentage;
+    final String dateFormatPattern;
+    final Double tradeLimit;
+    Double profitLimit;
+    Integer leverage;
+    String symbol;
+    Double rate;
+    Double price;
+    Long groupId;
+    Double responsePrice;
+    Double quantity;
+    String positionQuantity;
+    OrderSide orderSide;
 
     @Autowired
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
