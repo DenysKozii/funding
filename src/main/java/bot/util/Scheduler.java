@@ -1,6 +1,5 @@
 package bot.util;
 
-import bot.dto.OrderStatus;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -45,6 +44,7 @@ public class Scheduler {
     }
 
     private void open() {
+        trade.updateFunding();
         log.info("open started");
         connection.getClientFutures().forEach(trade::open);
         log.info("open finished");
@@ -72,14 +72,9 @@ public class Scheduler {
         closeLimit();
     }
 
-    @Scheduled(cron = "5 0 0 * * *", zone = "GMT+0")
-    public void close05() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
-    }
-
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
@@ -107,14 +102,9 @@ public class Scheduler {
         closeLimit();
     }
 
-    @Scheduled(cron = "5 0 8 * * *", zone = "GMT+0")
-    public void close85() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
-    }
-
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
@@ -142,14 +132,9 @@ public class Scheduler {
         closeLimit();
     }
 
-    @Scheduled(cron = "5 0 16 * * *", zone = "GMT+0")
-    public void close165() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
-    }
-
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
     public void close1610() {
-        trade.logOrder(OrderStatus.CLOSE, 0.0);
+        close();
     }
 
     @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")

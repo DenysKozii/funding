@@ -17,7 +17,9 @@ public interface Trade {
 
     void closeLimit(SyncRequestClient clientFutures);
 
-    void sendOrder(String positionQuantity, SyncRequestClient clientFutures);
+    void sendMarketOrder(String positionQuantity, SyncRequestClient clientFutures);
+
+    void sendLimitOrder(String positionQuantity, String price, SyncRequestClient clientFutures);
 
     void updateFunding();
 
@@ -28,4 +30,8 @@ public interface Trade {
     List<LogDto> getLogsByGroupId(Long groupId);
 
     List<LogPreviewDto> getLogPreviews();
+
+    void setLeverage(Integer leverage);
+
+    void setProfitLimit(Double profitLimit);
 }

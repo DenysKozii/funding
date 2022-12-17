@@ -43,9 +43,12 @@ public class TradeImpl implements Trade {
 
     String websocketUrl;
     Double tradePercentage;
-    Double tradeLimit;
-    Integer leverage;
     String dateFormatPattern;
+    Double tradeLimit;
+    @NonFinal
+    Double profitLimit;
+    @NonFinal
+    Integer leverage;
     @NonFinal
     String symbol;
     @NonFinal
@@ -69,6 +72,7 @@ public class TradeImpl implements Trade {
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
                      @Value("${trade.limit}") Double tradeLimit,
+                     @Value("${profit.limit}") Double profitLimit,
                      @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol,
                      @Value("${date.format.pattern}") String dateFormatPattern,
@@ -76,6 +80,7 @@ public class TradeImpl implements Trade {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.tradeLimit = tradeLimit;
+        this.profitLimit = profitLimit;
         this.leverage = leverage;
         this.symbol = symbol;
         this.dateFormatPattern = dateFormatPattern;
@@ -90,7 +95,6 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
-        updateFunding();
         groupId++;
         responsePrice = 0.0;
         if (Math.abs(rate) < tradeLimit) {
@@ -103,20 +107,16 @@ public class TradeImpl implements Trade {
         } catch (Exception ignored) {
         }
         clientFutures.changeInitialLeverage(symbol, leverage);
-        quantity = 20.0;
+
+        double accountBalance = getAccountBalance(clientFutures);
+        quantity = accountBalance * tradePercentage;
         quantity *= leverage;
         quantity /= price;
-        String positionQuantity = quantity.intValue() > 0 ? String.valueOf(quantity.intValue()) : String.format("%.1f", quantity);
-        log.info("position quantity = {}", positionQuantity);
-        log.info("position price = {}", price);
-        double accountBalance = getAccountBalance(clientFutures);
-        if (rate > 0) {
-            orderSide = OrderSide.BUY;
-            sendOrder(positionQuantity, clientFutures);
-        } else {
-            orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity, clientFutures);
-        }
+        String positionQuantity = quantity.intValue() > 0 ?
+                String.valueOf(quantity.intValue()) :
+                String.format("%.1f", quantity);
+        orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
+        sendMarketOrder(positionQuantity, clientFutures);
         logOrder(OrderStatus.OPEN, accountBalance);
     }
 
@@ -134,12 +134,11 @@ public class TradeImpl implements Trade {
         String positionQuantity = position.get().getPositionAmt().toString();
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
-            sendOrder(positionQuantity, clientFutures);
         } else {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
-            sendOrder(positionQuantity, clientFutures);
         }
+        sendMarketOrder(positionQuantity, clientFutures);
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
@@ -147,44 +146,47 @@ public class TradeImpl implements Trade {
     public void closeLimit(SyncRequestClient clientFutures) {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
-        String positionQuantity = position.get().getPositionAmt().toString();
-        if (OrderSide.BUY.equals(orderSide)) {
-            orderSide = OrderSide.SELL;
+        if (position.isPresent()) {
+            String positionQuantity = position.get().getPositionAmt().toString();
             int round = Double.toString(responsePrice).split("\\.")[1].length();
             log.info("round for {} = {}", responsePrice, round);
-            BigDecimal price = new BigDecimal(responsePrice * (1 - rate + 0.001)).setScale(round, RoundingMode.HALF_EVEN);
+            if (OrderSide.BUY.equals(orderSide)) {
+                orderSide = OrderSide.SELL;
+                price = new BigDecimal(responsePrice * (1 - rate + profitLimit))
+                        .setScale(round, RoundingMode.HALF_EVEN)
+                        .doubleValue();
+            } else {
+                orderSide = OrderSide.BUY;
+                price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
+                        .setScale(round, RoundingMode.HALF_EVEN)
+                        .doubleValue();
+            }
             log.info("sell price = {}", price);
-            Order order = clientFutures.postOrder(
-                    symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
-                    price.toString(), null, null, null, null, null, null, null, null,
-                    NewOrderRespType.RESULT);
-            responsePrice = order.getAvgPrice().doubleValue();
-            log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
+            sendLimitOrder(positionQuantity, price.toString(), clientFutures);
+            logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
-            orderSide = OrderSide.BUY;
-            int round = Double.toString(responsePrice).split("\\.")[1].length();
-            log.info("round for {} = {}", responsePrice, round);
-            BigDecimal price = new BigDecimal(responsePrice * (1 + rate - 0.001)).setScale(round, RoundingMode.HALF_EVEN);
-            log.info("sell price = {}", price);
-            positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
-            Order order = clientFutures.postOrder(
-                    symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
-                    price.toString(), null, null, null, null, null, null, null, null,
-                    NewOrderRespType.RESULT);
-            responsePrice = order.getAvgPrice().doubleValue();
-            log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
+            log.info("No positions for {}", symbol);
         }
-        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
     @Override
-    public void sendOrder(String positionQuantity, SyncRequestClient clientFutures) {
+    public void sendMarketOrder(String positionQuantity, SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
-        log.info("{} order sent with executed avg price = {}", symbol, order.getAvgPrice().doubleValue());
+        log.info("{} order sent with executed avg price = {}", symbol, responsePrice);
+    }
+
+    @Override
+    public void sendLimitOrder(String positionQuantity, String price, SyncRequestClient clientFutures) {
+        Order order = clientFutures.postOrder(
+                symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                price, null, null, null, null, null, null, null, null,
+                NewOrderRespType.RESULT);
+        responsePrice = order.getAvgPrice().doubleValue();
+        log.info("{} order sent with executed avg price = {}", symbol, responsePrice);
     }
 
     @Override
@@ -248,18 +250,18 @@ public class TradeImpl implements Trade {
                 openAccountBalance = log.getAccountBalance();
             }
             changeBalancePercent = OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice();
-            if (i % 6 == 2){
+            if (i % 6 == 2) {
                 mean10 += changeBalancePercent;
-                mean = mean10 / ((int) (i/6 + 1));
-            } else if (i % 6 == 3){
+                mean = mean10 / ((int) (i / 6 + 1));
+            } else if (i % 6 == 3) {
                 mean15 += changeBalancePercent;
-                mean = mean15 / ((int) (i/6 + 1));
-            } else if (i % 6 == 4){
+                mean = mean15 / ((int) (i / 6 + 1));
+            } else if (i % 6 == 4) {
                 mean30 += changeBalancePercent;
-                mean = mean30 / ((int) (i/6 + 1));
-            } else if (i % 6 == 5){
+                mean = mean30 / ((int) (i / 6 + 1));
+            } else if (i % 6 == 5) {
                 mean59 += changeBalancePercent;
-                mean = mean59 / ((int) (i/6 + 1));
+                mean = mean59 / ((int) (i / 6 + 1));
             }
             if (Objects.equals(log.getGroupId(), groupId)) {
                 LogDto logDto = LogDto.builder()

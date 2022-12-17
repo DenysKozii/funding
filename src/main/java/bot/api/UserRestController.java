@@ -36,6 +36,16 @@ public class UserRestController {
         return trade.getLogPreviews();
     }
 
+    @PutMapping("leverage")
+    public void setLeverage(@RequestParam Integer leverage) {
+        trade.setLeverage(leverage);
+    }
+
+    @PutMapping("profit")
+    public void setProfitLimit(@RequestParam Double profitLimit) {
+        trade.setProfitLimit(profitLimit);
+    }
+
     @PostMapping("credentials")
     public String addCredentials(@RequestBody CredentialsDto credentialsDto) {
         return connection.addCredentials(credentialsDto);
