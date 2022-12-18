@@ -101,12 +101,12 @@ public class TradeImpl implements Trade {
         quantity = accountBalance * tradePercentage;
         quantity *= leverage;
         quantity /= price;
-        String positionQuantity = quantity.intValue() > 0 ?
+        positionQuantity = quantity.intValue() > 0 ?
                 String.valueOf(quantity.intValue()) :
                 String.format("%.1f", quantity);
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
         log.info("open quantity = {}", positionQuantity);
-        sendMarketOrder(positionQuantity, clientFutures);
+        sendMarketOrder(clientFutures);
         logOrder(OrderStatus.OPEN, accountBalance);
     }
 
@@ -121,15 +121,12 @@ public class TradeImpl implements Trade {
             return;
         }
 
-        String positionQuantity = position.get().getPositionAmt().toString();
         if (OrderSide.BUY.equals(orderSide)) {
             orderSide = OrderSide.SELL;
         } else {
             orderSide = OrderSide.BUY;
-            positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
         }
-        log.info("close market quantity = {}", positionQuantity);
-        sendMarketOrder(positionQuantity, clientFutures);
+        sendMarketOrder(clientFutures);
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
@@ -138,7 +135,6 @@ public class TradeImpl implements Trade {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         if (position.isPresent()) {
-            String positionQuantity = position.get().getPositionAmt().toString();
             int round = Double.toString(responsePrice).split("\\.")[1].length();
             log.info("round for {} = {}", responsePrice, round);
             if (OrderSide.BUY.equals(orderSide)) {
@@ -153,8 +149,7 @@ public class TradeImpl implements Trade {
                         .doubleValue();
             }
             log.info("limit sell price = {}", price);
-            log.info("close limit quantity = {}", positionQuantity);
-            sendLimitOrder(positionQuantity, price.toString(), clientFutures);
+            sendLimitOrder(clientFutures);
             logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
             log.info("No positions for {}", symbol);
@@ -162,20 +157,21 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public void sendMarketOrder(String positionQuantity, SyncRequestClient clientFutures) {
+    public void sendMarketOrder(SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
-        log.info("{} order sent with executed avg price = {}", symbol, responsePrice);
+        positionQuantity = order.getExecutedQty().toString();
+        log.info("{} order sent with executed avg price = {} and quantity = {}", symbol, responsePrice, positionQuantity);
     }
 
     @Override
-    public void sendLimitOrder(String positionQuantity, String price, SyncRequestClient clientFutures) {
+    public void sendLimitOrder(SyncRequestClient clientFutures) {
         Order order = clientFutures.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
-                price, null, null, null, null, null, null, null, null,
+                price.toString(), null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
     }
