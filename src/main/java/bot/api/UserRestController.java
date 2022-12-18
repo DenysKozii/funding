@@ -42,8 +42,13 @@ public class UserRestController {
     }
 
     @PutMapping("profit")
-    public void setProfitLimit(@RequestParam Double profitLimit) {
-        trade.setProfitLimit(profitLimit);
+    public void setProfitLimit(@RequestParam Double limit) {
+        trade.setProfitLimit(limit);
+    }
+
+    @PutMapping("trade")
+    public void setTradeLimit(@RequestParam Double limit) {
+        trade.setTradeLimit(limit);
     }
 
     @PostMapping("credentials")

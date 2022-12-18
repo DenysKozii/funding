@@ -45,7 +45,7 @@ public class TradeImpl implements Trade {
     final String websocketUrl;
     final Double tradePercentage;
     final String dateFormatPattern;
-    final Double tradeLimit;
+    Double tradeLimit;
     Double profitLimit;
     Integer leverage;
     String symbol;

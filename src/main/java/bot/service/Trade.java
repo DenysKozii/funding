@@ -34,4 +34,6 @@ public interface Trade {
     void setLeverage(Integer leverage);
 
     void setProfitLimit(Double profitLimit);
+
+    void setTradeLimit(Double tradeLimit);
 }
