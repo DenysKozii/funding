@@ -105,6 +105,7 @@ public class TradeImpl implements Trade {
                 String.valueOf(quantity.intValue()) :
                 String.format("%.1f", quantity);
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
+        log.info("open quantity = {}", positionQuantity);
         sendMarketOrder(positionQuantity, clientFutures);
         logOrder(OrderStatus.OPEN, accountBalance);
     }
@@ -127,6 +128,7 @@ public class TradeImpl implements Trade {
             orderSide = OrderSide.BUY;
             positionQuantity = String.valueOf(-1 * Double.parseDouble(positionQuantity));
         }
+        log.info("close market quantity = {}", positionQuantity);
         sendMarketOrder(positionQuantity, clientFutures);
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
@@ -151,6 +153,7 @@ public class TradeImpl implements Trade {
                         .doubleValue();
             }
             log.info("limit sell price = {}", price);
+            log.info("close limit quantity = {}", positionQuantity);
             sendLimitOrder(positionQuantity, price.toString(), clientFutures);
             logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
