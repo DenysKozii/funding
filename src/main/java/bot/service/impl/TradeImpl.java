@@ -283,7 +283,6 @@ public class TradeImpl implements Trade {
 
     @Override
     public void logOrder(OrderStatus orderStatus, Double accountBalance) {
-        updateFunding();
         DateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
         Date date = new Date();
         Log log = Log.builder()
