@@ -72,11 +72,6 @@ public class Scheduler {
         closeLimit();
     }
 
-    @Scheduled(cron = "6 0 0 * * *", zone = "GMT+0")
-    public void close06() {
-        close();
-    }
-
     @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
     public void close010() {
         close();
@@ -107,11 +102,6 @@ public class Scheduler {
         closeLimit();
     }
 
-    @Scheduled(cron = "6 0 8 * * *", zone = "GMT+0")
-    public void close86() {
-        close();
-    }
-
     @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
     public void close810() {
         close();
@@ -140,11 +130,6 @@ public class Scheduler {
     @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
     public void close16() {
         closeLimit();
-    }
-
-    @Scheduled(cron = "6 0 16 * * *", zone = "GMT+0")
-    public void close166() {
-        close();
     }
 
     @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
