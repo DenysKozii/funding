@@ -67,7 +67,7 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 0 0 * * *", zone = "GMT+0")
     public void close0() {
         closeLimit();
     }
@@ -97,7 +97,7 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 0 8 * * *", zone = "GMT+0")
     public void close8() {
         closeLimit();
     }
@@ -127,7 +127,7 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "1 0 16 * * *", zone = "GMT+0")
     public void close16() {
         closeLimit();
     }

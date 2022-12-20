@@ -139,12 +139,12 @@ public class TradeImpl implements Trade {
             log.info("round for {} = {}", responsePrice, round);
             if (OrderSide.BUY.equals(orderSide)) {
                 orderSide = OrderSide.SELL;
-                price = new BigDecimal(responsePrice * (1 - rate + profitLimit))
+                price = new BigDecimal(responsePrice * (1 - 0.00925 + profitLimit))
                         .setScale(round / 2, RoundingMode.HALF_EVEN)
                         .doubleValue();
             } else {
                 orderSide = OrderSide.BUY;
-                price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
+                price = new BigDecimal(responsePrice * (1 + 0.00925 - profitLimit))
                         .setScale(round / 2, RoundingMode.HALF_EVEN)
                         .doubleValue();
             }
