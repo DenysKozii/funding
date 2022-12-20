@@ -7,6 +7,7 @@ import bot.entity.Log;
 import bot.repository.LogRepository;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
+import com.binance.client.exception.BinanceApiException;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Order;
@@ -56,6 +57,7 @@ public class TradeImpl implements Trade {
     Double quantity;
     String positionQuantity;
     OrderSide orderSide;
+    Integer roundStart;
 
     @Autowired
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
@@ -64,6 +66,7 @@ public class TradeImpl implements Trade {
                      @Value("${profit.limit}") Double profitLimit,
                      @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol,
+                     @Value("${round.start}") Integer roundStart,
                      @Value("${date.format.pattern}") String dateFormatPattern,
                      LogRepository logRepository) {
         this.websocketUrl = websocketUrl;
@@ -72,6 +75,7 @@ public class TradeImpl implements Trade {
         this.profitLimit = profitLimit;
         this.leverage = leverage;
         this.symbol = symbol;
+        this.roundStart = roundStart;
         this.dateFormatPattern = dateFormatPattern;
         this.logRepository = logRepository;
         if (logRepository.count() > 0) {
@@ -135,21 +139,10 @@ public class TradeImpl implements Trade {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         if (position.isPresent()) {
-            int round = Double.toString(responsePrice).split("\\.")[1].length();
-            log.info("round for {} = {}", responsePrice, round);
-            if (OrderSide.BUY.equals(orderSide)) {
-                orderSide = OrderSide.SELL;
-                price = new BigDecimal(responsePrice * (1 - rate + profitLimit))
-                        .setScale(round / 2, RoundingMode.HALF_EVEN)
-                        .doubleValue();
-            } else {
-                orderSide = OrderSide.BUY;
-                price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
-                        .setScale(round / 2, RoundingMode.HALF_EVEN)
-                        .doubleValue();
+            int round = roundStart;
+            while (round > 0 && !sendLimitOrder(clientFutures, round)) {
+                round--;
             }
-            log.info("limit sell price = {}", price);
-            sendLimitOrder(clientFutures);
             logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
             log.info("No positions for {}", symbol);
@@ -168,12 +161,29 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public void sendLimitOrder(SyncRequestClient clientFutures) {
-        Order order = clientFutures.postOrder(
-                symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
-                price.toString(), null, null, null, null, null, null, null, null,
-                NewOrderRespType.RESULT);
-        responsePrice = order.getAvgPrice().doubleValue();
+    public boolean sendLimitOrder(SyncRequestClient clientFutures, int round) {
+        try {
+            if (OrderSide.BUY.equals(orderSide)) {
+                orderSide = OrderSide.SELL;
+                price = new BigDecimal(responsePrice * (1 - rate + profitLimit))
+                        .setScale(round, RoundingMode.HALF_EVEN)
+                        .doubleValue();
+            } else {
+                orderSide = OrderSide.BUY;
+                price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
+                        .setScale(round, RoundingMode.HALF_EVEN)
+                        .doubleValue();
+            }
+            log.info("{} limit close with round = {}", symbol, round);
+            Order order = clientFutures.postOrder(
+                    symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                    price.toString(), null, null, null, null, null, null, null, null,
+                    NewOrderRespType.RESULT);
+            responsePrice = order.getAvgPrice().doubleValue();
+            return true;
+        } catch (BinanceApiException binanceApiException) {
+            return false;
+        }
     }
 
     @Override

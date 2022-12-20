@@ -62,12 +62,12 @@ public class Scheduler {
         log.info("close limit finished");
     }
 
-    @Scheduled(cron = "58 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
     public void open0() {
         open();
     }
 
-    @Scheduled(cron = "1 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
     public void close0() {
         closeLimit();
     }
@@ -92,12 +92,12 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "58 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
     public void open8() {
         open();
     }
 
-    @Scheduled(cron = "1 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
     public void close8() {
         closeLimit();
     }
@@ -122,12 +122,12 @@ public class Scheduler {
         close();
     }
 
-    @Scheduled(cron = "58 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
     public void open16() {
         open();
     }
 
-    @Scheduled(cron = "1 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
     public void close16() {
         closeLimit();
     }
