@@ -165,13 +165,13 @@ public class TradeImpl implements Trade {
         try {
             if (OrderSide.BUY.equals(orderSide)) {
                 orderSide = OrderSide.SELL;
-                price = new BigDecimal(responsePrice * (1 - rate + profitLimit))
-                        .setScale(round, RoundingMode.HALF_EVEN)
+                price = new BigDecimal(responsePrice * (1 + rate + profitLimit))
+                        .setScale(round, RoundingMode.HALF_UP)
                         .doubleValue();
             } else {
                 orderSide = OrderSide.BUY;
                 price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
-                        .setScale(round, RoundingMode.HALF_EVEN)
+                        .setScale(round, RoundingMode.HALF_DOWN)
                         .doubleValue();
             }
             log.info("{} limit close with round = {}", symbol, round);
