@@ -90,6 +90,10 @@ public class TradeImpl implements Trade {
     public void open(SyncRequestClient clientFutures) {
         groupId++;
         responsePrice = 0.0;
+        if (symbol.equals("CELOUSDT")){
+            log.info("symbol {} was banned", symbol);
+            return;
+        }
         if (Math.abs(rate) < tradeLimit) {
             logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
             log.info("rate {} is lower than limit {}", rate, tradeLimit);
