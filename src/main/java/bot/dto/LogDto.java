@@ -33,8 +33,6 @@ public class LogDto {
 
     Double priceChangePercent;
 
-    Double meanChangePercent;
-
     Double accountBalance;
 
     Double accountBalanceChangePercent;
