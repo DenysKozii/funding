@@ -90,10 +90,6 @@ public class TradeImpl implements Trade {
     public void open(SyncRequestClient clientFutures) {
         groupId++;
         responsePrice = 0.0;
-        if (symbol.equals("CELOUSDT")){
-            log.info("symbol {} was banned", symbol);
-            return;
-        }
         if (Math.abs(rate) < tradeLimit) {
             logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
             log.info("rate {} is lower than limit {}", rate, tradeLimit);
@@ -122,7 +118,7 @@ public class TradeImpl implements Trade {
     public void close(SyncRequestClient clientFutures) {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
-
+        clientFutures.cancelAllOpenOrder(symbol);
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
             logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
             log.info("position {} is already closed", symbol);
