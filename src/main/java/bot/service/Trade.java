@@ -19,7 +19,7 @@ public interface Trade {
 
     void sendMarketOrder(SyncRequestClient clientFutures);
 
-    boolean sendLimitOrder(SyncRequestClient clientFutures, int round);
+    boolean sendLimitOrder(SyncRequestClient clientFutures, int round, int step, String quantity);
 
     void updateFunding();
 
