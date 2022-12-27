@@ -46,7 +46,6 @@ public class TradeImpl implements Trade {
     final String websocketUrl;
     final Double tradePercentage;
     final String dateFormatPattern;
-    final String marginMessage;
     Double tradeLimit;
     Double profitLimit;
     Integer leverage;
@@ -59,7 +58,6 @@ public class TradeImpl implements Trade {
     String positionQuantity;
     OrderSide orderSide;
     Integer roundStart;
-    Integer stepsMax;
 
     @Autowired
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
@@ -69,8 +67,6 @@ public class TradeImpl implements Trade {
                      @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol,
                      @Value("${round.start}") Integer roundStart,
-                     @Value("${steps.max}") Integer stepsMax,
-                     @Value("${margine.exception.message}") String marginMessage,
                      @Value("${date.format.pattern}") String dateFormatPattern,
                      LogRepository logRepository) {
         this.websocketUrl = websocketUrl;
@@ -80,8 +76,6 @@ public class TradeImpl implements Trade {
         this.leverage = leverage;
         this.symbol = symbol;
         this.roundStart = roundStart;
-        this.stepsMax = stepsMax;
-        this.marginMessage = marginMessage;
         this.dateFormatPattern = dateFormatPattern;
         this.logRepository = logRepository;
         if (logRepository.count() > 0) {
@@ -115,7 +109,7 @@ public class TradeImpl implements Trade {
                 String.valueOf(quantity.intValue()) :
                 String.format("%.1f", quantity);
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
-        log.info("open quantity = {}", positionQuantity);
+        log.info("open quantity = {}, rate = {}, order side = {}", positionQuantity, rate, orderSide);
         sendMarketOrder(clientFutures);
         logOrder(OrderStatus.OPEN, accountBalance);
     }
@@ -136,6 +130,9 @@ public class TradeImpl implements Trade {
         } else {
             orderSide = OrderSide.BUY;
         }
+        if (position.get().getPositionAmt().doubleValue() < 0) {
+            positionQuantity = String.valueOf(-1 * position.get().getPositionAmt().doubleValue());
+        }
         sendMarketOrder(clientFutures);
         logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
@@ -145,19 +142,10 @@ public class TradeImpl implements Trade {
         Optional<Position> position = clientFutures.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         if (position.isPresent() && position.get().getPositionAmt() != null) {
-            int step = 1;
             int round = price > 1 ? 4 : roundStart;
             round = price > 100 ? 3 : round;
-            String quantity = String.valueOf((int) (Double.parseDouble(positionQuantity) / 2));
-            while (step <= stepsMax && round > 0) {
-                if (sendLimitOrder(clientFutures, round, step, quantity)) {
-                    step++;
-                    if (step != stepsMax) {
-                        quantity = String.valueOf((int) (Double.parseDouble(quantity) / 2));
-                    }
-                } else {
-                    round--;
-                }
+            while (!sendLimitOrder(clientFutures, round) && round > 0) {
+                round--;
             }
             logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
@@ -166,30 +154,28 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public boolean sendLimitOrder(SyncRequestClient clientFutures, int round, int step, String quantity) {
+    public boolean sendLimitOrder(SyncRequestClient clientFutures, int round) {
         try {
+            OrderSide side;
             if (OrderSide.BUY.equals(orderSide)) {
-                orderSide = OrderSide.SELL;
-                price = new BigDecimal(responsePrice * (1 + rate + profitLimit * step))
+                side = OrderSide.SELL;
+                price = new BigDecimal(responsePrice * (1 + rate + profitLimit))
                         .setScale(round, RoundingMode.HALF_UP)
                         .doubleValue();
             } else {
-                orderSide = OrderSide.BUY;
-                price = new BigDecimal(responsePrice * (1 + rate - profitLimit * step))
+                side = OrderSide.BUY;
+                price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
                         .setScale(round, RoundingMode.HALF_DOWN)
                         .doubleValue();
             }
-            log.info("{} limit close with round = {}", symbol, round);
-            clientFutures.postOrder(
-                    symbol, orderSide, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, quantity,
+            Order order = clientFutures.postOrder(
+                    symbol, side, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
                     price.toString(), null, null, null, null, null, null, null, null,
                     NewOrderRespType.RESULT);
+            log.info("{} limit close with round = {} and price = {}", symbol, round, order.getPrice());
             return true;
         } catch (BinanceApiException binanceApiException) {
             log.error(binanceApiException.getMessage());
-            if (binanceApiException.getMessage().equals(marginMessage)) {
-                return sendLimitOrder(clientFutures, round, step, quantity);
-            }
             return false;
         }
     }
