@@ -3,6 +3,7 @@ package bot.api;
 import bot.dto.CredentialsDto;
 import bot.dto.LogDto;
 import bot.dto.LogPreviewDto;
+import bot.dto.SettingsDto;
 import bot.service.Connection;
 import bot.service.Trade;
 import lombok.AccessLevel;
@@ -36,19 +37,9 @@ public class UserRestController {
         return trade.getLogPreviews();
     }
 
-    @PutMapping("leverage")
-    public void setLeverage(@RequestParam Integer leverage) {
-        trade.setLeverage(leverage);
-    }
-
-    @PutMapping("profit")
-    public void setProfitLimit(@RequestParam Double limit) {
-        trade.setProfitLimit(limit);
-    }
-
-    @PutMapping("trade")
-    public void setTradeLimit(@RequestParam Double limit) {
-        trade.setTradeLimit(limit);
+    @PutMapping("settings")
+    public void updateSetting(@RequestBody SettingsDto settings) {
+        trade.updateSettings(settings);
     }
 
     @PostMapping("credentials")

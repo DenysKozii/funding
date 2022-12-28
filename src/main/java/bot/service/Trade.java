@@ -3,6 +3,7 @@ package bot.service;
 import bot.dto.LogDto;
 import bot.dto.LogPreviewDto;
 import bot.dto.OrderStatus;
+import bot.dto.SettingsDto;
 import com.binance.client.SyncRequestClient;
 
 import java.util.List;
@@ -31,9 +32,5 @@ public interface Trade {
 
     List<LogPreviewDto> getLogPreviews();
 
-    void setLeverage(Integer leverage);
-
-    void setProfitLimit(Double profitLimit);
-
-    void setTradeLimit(Double tradeLimit);
+    void updateSettings(SettingsDto settings);
 }

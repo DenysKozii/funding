@@ -3,6 +3,7 @@ package bot.service.impl;
 import bot.dto.LogDto;
 import bot.dto.LogPreviewDto;
 import bot.dto.OrderStatus;
+import bot.dto.SettingsDto;
 import bot.entity.Log;
 import bot.repository.LogRepository;
 import bot.service.Trade;
@@ -46,7 +47,8 @@ public class TradeImpl implements Trade {
     final String websocketUrl;
     final Double tradePercentage;
     final String dateFormatPattern;
-    Double tradeLimit;
+    final String spliterator;
+    Double fundingLimit;
     Double profitLimit;
     Integer leverage;
     String symbol;
@@ -62,21 +64,23 @@ public class TradeImpl implements Trade {
     @Autowired
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
-                     @Value("${trade.limit}") Double tradeLimit,
+                     @Value("${funding.limit}") Double fundingLimit,
                      @Value("${profit.limit}") Double profitLimit,
                      @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol,
                      @Value("${round.start}") Integer roundStart,
                      @Value("${date.format.pattern}") String dateFormatPattern,
+                     @Value("${spliterator}") String spliterator,
                      LogRepository logRepository) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
-        this.tradeLimit = tradeLimit;
+        this.fundingLimit = fundingLimit;
         this.profitLimit = profitLimit;
         this.leverage = leverage;
         this.symbol = symbol;
         this.roundStart = roundStart;
         this.dateFormatPattern = dateFormatPattern;
+        this.spliterator = spliterator;
         this.logRepository = logRepository;
         if (logRepository.count() > 0) {
             this.groupId = logRepository.findAll().get((int) logRepository.count() - 1).getGroupId();
@@ -90,9 +94,9 @@ public class TradeImpl implements Trade {
     public void open(SyncRequestClient clientFutures) {
         groupId++;
         responsePrice = 0.0;
-        if (Math.abs(rate) < tradeLimit) {
+        if (Math.abs(rate) < fundingLimit) {
             logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
-            log.info("rate {} is lower than limit {}", rate, tradeLimit);
+            log.info("rate {} is lower than limit {}", rate, fundingLimit);
             return;
         }
         try {
@@ -219,10 +223,13 @@ public class TradeImpl implements Trade {
             var bufReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
             String line;
             while ((line = bufReader.readLine()) != null) {
-                log.info("symbol = {}", line.split(";")[0]);
-                log.info("rate = {}", Double.parseDouble(line.split(";")[1]));
-                log.info("price = {}", Double.parseDouble(line.split(";")[2]));
+                log.info("symbol = {}", line.split(spliterator)[0]);
+                log.info("rate = {}", Double.parseDouble(line.split(spliterator)[1]));
+                log.info("price = {}", Double.parseDouble(line.split(spliterator)[2]));
             }
+            log.info("leverage = {}", leverage);
+            log.info("profit limit = {}", profitLimit);
+            log.info("funding rate limit = {}", fundingLimit);
         }
     }
 
@@ -230,6 +237,13 @@ public class TradeImpl implements Trade {
     public double getAccountBalance(SyncRequestClient clientFutures) {
         AccountInformation accountInformation = clientFutures.getAccountInformation();
         return accountInformation.getAvailableBalance().doubleValue();
+    }
+
+    @Override
+    public void updateSettings(SettingsDto settings) {
+        leverage = settings.getLeverage();
+        profitLimit = settings.getProfitLimit();
+        fundingLimit = settings.getFundingLimit();
     }
 
     @Override
