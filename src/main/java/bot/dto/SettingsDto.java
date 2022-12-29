@@ -12,8 +12,6 @@ public class SettingsDto {
 
     Integer leverage;
 
-    Double profitLimit;
-
     Double fundingLimit;
 
 }

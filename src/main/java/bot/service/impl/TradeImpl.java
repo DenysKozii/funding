@@ -1,9 +1,7 @@
 package bot.service.impl;
 
-import bot.dto.LogDto;
-import bot.dto.LogPreviewDto;
+import bot.dto.*;
 import bot.dto.OrderStatus;
-import bot.dto.SettingsDto;
 import bot.entity.Log;
 import bot.repository.LogRepository;
 import bot.service.Trade;
@@ -148,6 +146,16 @@ public class TradeImpl implements Trade {
         if (position.isPresent() && position.get().getPositionAmt() != null) {
             int round = price > 1 ? 4 : roundStart;
             round = price > 100 ? 3 : round;
+            double absoluteRate = Math.abs(rate);
+            if (absoluteRate < ProfitLevel.LOW.getFunding()) {
+                profitLimit = ProfitLevel.LOW.getProfit();
+            } else if (absoluteRate < ProfitLevel.MEDIUM.getFunding()) {
+                profitLimit = ProfitLevel.MEDIUM.getFunding();
+            } else if (absoluteRate < ProfitLevel.HIGH.getFunding()) {
+                profitLimit = ProfitLevel.HIGH.getFunding();
+            } else if (absoluteRate < ProfitLevel.SUPER.getFunding()) {
+                profitLimit = ProfitLevel.SUPER.getFunding();
+            }
             while (!sendLimitOrder(clientFutures, round) && round > 0) {
                 round--;
             }
@@ -242,7 +250,6 @@ public class TradeImpl implements Trade {
     @Override
     public void updateSettings(SettingsDto settings) {
         leverage = settings.getLeverage();
-        profitLimit = settings.getProfitLimit();
         fundingLimit = settings.getFundingLimit();
     }
 
