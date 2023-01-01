@@ -1,9 +1,7 @@
 package bot.service.impl;
 
-import bot.dto.*;
-import bot.dto.OrderStatus;
-import bot.entity.Log;
-import bot.repository.LogRepository;
+import bot.dto.ProfitLevel;
+import bot.dto.SettingsDto;
 import bot.service.Trade;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.exception.BinanceApiException;
@@ -29,18 +27,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Data
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TradeImpl implements Trade {
-
-    final LogRepository logRepository;
 
     final String websocketUrl;
     final Double tradePercentage;
@@ -68,8 +61,7 @@ public class TradeImpl implements Trade {
                      @Value("${symbol.default}") String symbol,
                      @Value("${round.start}") Integer roundStart,
                      @Value("${date.format.pattern}") String dateFormatPattern,
-                     @Value("${spliterator}") String spliterator,
-                     LogRepository logRepository) {
+                     @Value("${spliterator}") String spliterator) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.fundingLimit = fundingLimit;
@@ -79,12 +71,6 @@ public class TradeImpl implements Trade {
         this.roundStart = roundStart;
         this.dateFormatPattern = dateFormatPattern;
         this.spliterator = spliterator;
-        this.logRepository = logRepository;
-        if (logRepository.count() > 0) {
-            this.groupId = logRepository.findAll().get((int) logRepository.count() - 1).getGroupId();
-        } else {
-            this.groupId = 0L;
-        }
     }
 
     @Override
@@ -93,7 +79,6 @@ public class TradeImpl implements Trade {
         groupId++;
         responsePrice = 0.0;
         if (Math.abs(rate) < fundingLimit) {
-            logOrder(OrderStatus.OPEN, getAccountBalance(clientFutures));
             log.info("rate {} is lower than limit {}", rate, fundingLimit);
             return;
         }
@@ -113,7 +98,6 @@ public class TradeImpl implements Trade {
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
         log.info("open quantity = {}, rate = {}, order side = {}", positionQuantity, rate, orderSide);
         sendMarketOrder(clientFutures);
-        logOrder(OrderStatus.OPEN, accountBalance);
     }
 
     @Override
@@ -122,7 +106,6 @@ public class TradeImpl implements Trade {
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         clientFutures.cancelAllOpenOrder(symbol);
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
-            logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
             log.info("position {} is already closed", symbol);
             return;
         }
@@ -136,7 +119,6 @@ public class TradeImpl implements Trade {
             positionQuantity = String.valueOf(-1 * position.get().getPositionAmt().doubleValue());
         }
         sendMarketOrder(clientFutures);
-        logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
     }
 
     @Override
@@ -159,7 +141,6 @@ public class TradeImpl implements Trade {
             while (!sendLimitOrder(clientFutures, round) && round > 0) {
                 round--;
             }
-            logOrder(OrderStatus.CLOSE, getAccountBalance(clientFutures));
         } else {
             log.info("No positions for {}", symbol);
         }
@@ -253,64 +234,4 @@ public class TradeImpl implements Trade {
         fundingLimit = settings.getFundingLimit();
     }
 
-    @Override
-    public List<LogDto> getLogsByGroupId(Long groupId) {
-        List<LogDto> logs = new ArrayList<>();
-        double openPrice = 0;
-        double openAccountBalance = 0;
-        double changeBalancePercent;
-        OrderSide openOrderSide = OrderSide.BUY;
-        for (Log log : logRepository.findAll()) {
-            if (OrderStatus.OPEN.equals(log.getOrderStatus())) {
-                openPrice = log.getResponsePrice() == 0 ? log.getPrice() : log.getResponsePrice();
-                openOrderSide = log.getOrderSide();
-                openAccountBalance = log.getAccountBalance();
-            }
-            changeBalancePercent = OrderSide.BUY.equals(openOrderSide) ? log.getPrice() / openPrice : openPrice / log.getPrice();
-            if (Objects.equals(log.getGroupId(), groupId)) {
-                LogDto logDto = LogDto.builder()
-                        .groupId(log.getGroupId())
-                        .date(log.getDate())
-                        .symbol(log.getSymbol())
-                        .name("Denys")
-                        .rate(log.getRate())
-                        .orderStatus(log.getOrderStatus())
-                        .price(log.getPrice())
-                        .responsePrice(log.getResponsePrice())
-                        .accountBalance(log.getAccountBalance())
-                        .orderSide(log.getOrderSide())
-                        .priceChangePercent(changeBalancePercent)
-                        .accountBalanceChangePercent(log.getAccountBalance() / openAccountBalance)
-                        .build();
-                logs.add(logDto);
-            }
-        }
-        return logs;
-    }
-
-    @Override
-    public List<LogPreviewDto> getLogPreviews() {
-        return logRepository.findAll().stream()
-                .filter(log -> OrderStatus.OPEN.equals(log.getOrderStatus()))
-                .map(log -> new LogPreviewDto(log.getGroupId(), log.getDate(), log.getSymbol()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void logOrder(OrderStatus orderStatus, Double accountBalance) {
-        DateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
-        Date date = new Date();
-        Log log = Log.builder()
-                .groupId(groupId)
-                .date(dateFormat.format(date))
-                .symbol(symbol)
-                .rate(rate)
-                .price(price)
-                .responsePrice(responsePrice)
-                .orderStatus(orderStatus)
-                .accountBalance(accountBalance)
-                .orderSide(orderSide)
-                .build();
-        logRepository.save(log);
-    }
 }

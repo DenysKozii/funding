@@ -1,18 +1,11 @@
 package bot.service;
 
-import bot.dto.LogDto;
-import bot.dto.LogPreviewDto;
-import bot.dto.OrderStatus;
 import bot.dto.SettingsDto;
 import com.binance.client.SyncRequestClient;
-
-import java.util.List;
 
 public interface Trade {
 
     void open(SyncRequestClient clientFutures);
-
-    void logOrder(OrderStatus orderStatus, Double accountBalance);
 
     void close(SyncRequestClient clientFutures);
 
@@ -27,10 +20,6 @@ public interface Trade {
     void logFunding();
 
     double getAccountBalance(SyncRequestClient clientFutures);
-
-    List<LogDto> getLogsByGroupId(Long groupId);
-
-    List<LogPreviewDto> getLogPreviews();
 
     void updateSettings(SettingsDto settings);
 }
