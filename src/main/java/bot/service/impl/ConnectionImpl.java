@@ -10,7 +10,6 @@ import com.binance.client.exception.BinanceApiException;
 import com.binance.client.impl.BinanceApiInternalFactory;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ public class ConnectionImpl implements Connection {
         this.credentialsRepository = credentialsRepository;
     }
 
-    @SneakyThrows
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
         credentialsRepository.findAll().forEach(credentials -> clientFutures.add(BinanceApiInternalFactory
@@ -47,7 +45,6 @@ public class ConnectionImpl implements Connection {
                 client.getAccountInformation().getAvailableBalance()));
     }
 
-    @SneakyThrows
     @Override
     public String addCredentials(CredentialsDto credentials) {
         if (!credentialsRepository.existsById(credentials.getKey())) {

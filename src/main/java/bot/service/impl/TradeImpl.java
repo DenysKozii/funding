@@ -45,7 +45,6 @@ public class TradeImpl implements Trade {
     String symbol;
     Double rate;
     Double price;
-    Long groupId;
     Double responsePrice;
     Double quantity;
     String positionQuantity;
@@ -76,7 +75,6 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
-        groupId++;
         responsePrice = 0.0;
         if (Math.abs(rate) < fundingLimit) {
             log.info("rate {} is lower than limit {}", rate, fundingLimit);
@@ -132,11 +130,9 @@ public class TradeImpl implements Trade {
             if (absoluteRate < ProfitLevel.LOW.getFunding()) {
                 profitLimit = ProfitLevel.LOW.getProfit();
             } else if (absoluteRate < ProfitLevel.MEDIUM.getFunding()) {
-                profitLimit = ProfitLevel.MEDIUM.getFunding();
+                profitLimit = ProfitLevel.MEDIUM.getProfit();
             } else if (absoluteRate < ProfitLevel.HIGH.getFunding()) {
-                profitLimit = ProfitLevel.HIGH.getFunding();
-            } else if (absoluteRate < ProfitLevel.SUPER.getFunding()) {
-                profitLimit = ProfitLevel.SUPER.getFunding();
+                profitLimit = ProfitLevel.HIGH.getProfit();
             }
             while (!sendLimitOrder(clientFutures, round) && round > 0) {
                 round--;
