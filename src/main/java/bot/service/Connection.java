@@ -1,7 +1,7 @@
 package bot.service;
 
+import bot.binance.SyncRequestClient;
 import bot.dto.CredentialsDto;
-import com.binance.client.SyncRequestClient;
 
 import java.util.List;
 

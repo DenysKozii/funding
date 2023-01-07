@@ -34,13 +34,13 @@ public class Scheduler {
         this.connection = connection;
     }
 
-    @Scheduled(fixedRate = 1000 * 60 * 5)
+    @Scheduled(fixedRate = 1000 * 60)
     public void timer() throws IOException {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             HttpUriRequest request = new HttpGet(herokuUrl);
             client.execute(request);
         }
-        trade.logFunding();
+        trade.logParameters();
     }
 
     private void open() {

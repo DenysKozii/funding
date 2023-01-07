@@ -1,7 +1,9 @@
 package bot.service;
 
 import bot.dto.SettingsDto;
-import com.binance.client.SyncRequestClient;
+import bot.binance.SyncRequestClient;
+
+import java.util.List;
 
 public interface Trade {
 
@@ -17,7 +19,9 @@ public interface Trade {
 
     void updateFunding();
 
-    void logFunding();
+    void logParameters();
+
+    List<String> getFunding();
 
     double getAccountBalance(SyncRequestClient clientFutures);
 

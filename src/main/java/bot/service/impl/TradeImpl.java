@@ -1,14 +1,9 @@
 package bot.service.impl;
 
+import bot.binance.*;
 import bot.dto.ProfitLevel;
 import bot.dto.SettingsDto;
 import bot.service.Trade;
-import com.binance.client.SyncRequestClient;
-import com.binance.client.exception.BinanceApiException;
-import com.binance.client.model.enums.*;
-import com.binance.client.model.trade.AccountInformation;
-import com.binance.client.model.trade.Order;
-import com.binance.client.model.trade.Position;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -27,7 +22,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 @Slf4j
@@ -183,38 +178,40 @@ public class TradeImpl implements Trade {
     @Override
     @SneakyThrows
     public void updateFunding() {
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            HttpUriRequest request = new HttpGet(websocketUrl);
-            HttpResponse response = client.execute(request);
-            var bufReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            String line;
-            while ((line = bufReader.readLine()) != null) {
-                symbol = line.split(";")[0];
-                rate = Double.parseDouble(line.split(";")[1]);
-                price = Double.parseDouble(line.split(";")[2]);
-                log.info("symbol = {}", symbol);
-                log.info("rate = {}", rate);
-                log.info("price = {}", price);
-            }
-        }
+        List<String> funding = getFunding();
+        symbol = funding.get(0);
+        rate = Double.parseDouble(funding.get(1));
+        price = Double.parseDouble(funding.get(2));
+        log.info("symbol = {}", symbol);
+        log.info("rate = {}", rate);
+        log.info("price = {}", price);
     }
 
     @Override
     @SneakyThrows
-    public void logFunding() {
+    public void logParameters() {
+        getFunding();
+        log.info("leverage = {}", leverage);
+        log.info("profit limit = {}", profitLimit);
+        log.info("funding rate limit = {}", fundingLimit);
+    }
+
+    @Override
+    @SneakyThrows
+    public List<String> getFunding() {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             HttpUriRequest request = new HttpGet(websocketUrl);
             HttpResponse response = client.execute(request);
             var bufReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
             String line;
+            List<String> elements = Collections.emptyList();
             while ((line = bufReader.readLine()) != null) {
-                log.info("symbol = {}", line.split(spliterator)[0]);
-                log.info("rate = {}", Double.parseDouble(line.split(spliterator)[1]));
-                log.info("price = {}", Double.parseDouble(line.split(spliterator)[2]));
+                elements = Arrays.asList(line.split(spliterator));
+                log.info("{}: rate = {}, price = {}", elements.get(0),
+                        Double.parseDouble(elements.get(1)),
+                        Double.parseDouble(elements.get(2)));
             }
-            log.info("leverage = {}", leverage);
-            log.info("profit limit = {}", profitLimit);
-            log.info("funding rate limit = {}", fundingLimit);
+            return elements;
         }
     }
 
