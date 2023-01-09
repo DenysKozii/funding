@@ -83,9 +83,9 @@ public class TradeImpl implements Trade {
             clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
         } catch (Exception ignored) {
         }
-        clientFutures.changeInitialLeverage(symbol, leverage);
 
         double accountBalance = getAccountBalance(clientFutures);
+        clientFutures.changeInitialLeverage(symbol, leverage);
         quantity = accountBalance * tradePercentage;
         quantity *= leverage;
         quantity /= price;
