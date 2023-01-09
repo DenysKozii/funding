@@ -26,4 +26,7 @@ public interface Trade {
     double getAccountBalance(SyncRequestClient clientFutures);
 
     void updateSettings(SettingsDto settings);
+
+    void reconnectSocket();
+
 }

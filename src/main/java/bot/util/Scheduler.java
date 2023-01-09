@@ -51,15 +51,20 @@ public class Scheduler {
     }
 
     private void close() {
-        log.info("close started");
+        log.info("close market started");
         connection.getClientFutures().forEach(trade::close);
-        log.info("close finished");
+        log.info("close market finished");
     }
 
     private void closeLimit() {
         log.info("close limit started");
         connection.getClientFutures().forEach(trade::closeLimit);
         log.info("close limit finished");
+    }
+
+    @Scheduled(cron = "0 59 23 * * *", zone = "GMT+0")
+    public void reconnect0() {
+        trade.reconnectSocket();
     }
 
     @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
@@ -92,6 +97,11 @@ public class Scheduler {
         close();
     }
 
+    @Scheduled(cron = "0 59 7 * * *", zone = "GMT+0")
+    public void reconnect8() {
+        trade.reconnectSocket();
+    }
+
     @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
     public void open8() {
         open();
@@ -120,6 +130,11 @@ public class Scheduler {
     @Scheduled(cron = "59 0 8 * * *", zone = "GMT+0")
     public void close859() {
         close();
+    }
+
+    @Scheduled(cron = "0 59 15 * * *", zone = "GMT+0")
+    public void reconnect16() {
+        trade.reconnectSocket();
     }
 
     @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")

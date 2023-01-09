@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -34,6 +35,7 @@ public class TradeImpl implements Trade {
     final Double tradePercentage;
     final String dateFormatPattern;
     final String spliterator;
+    final String updateWebsocketSuffix;
     Double fundingLimit;
     Double profitLimit;
     Integer leverage;
@@ -55,6 +57,7 @@ public class TradeImpl implements Trade {
                      @Value("${symbol.default}") String symbol,
                      @Value("${round.start}") Integer roundStart,
                      @Value("${date.format.pattern}") String dateFormatPattern,
+                     @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
                      @Value("${spliterator}") String spliterator) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
@@ -64,6 +67,7 @@ public class TradeImpl implements Trade {
         this.symbol = symbol;
         this.roundStart = roundStart;
         this.dateFormatPattern = dateFormatPattern;
+        this.updateWebsocketSuffix = updateWebsocketSuffix;
         this.spliterator = spliterator;
     }
 
@@ -225,6 +229,16 @@ public class TradeImpl implements Trade {
     public void updateSettings(SettingsDto settings) {
         leverage = settings.getLeverage();
         fundingLimit = settings.getFundingLimit();
+    }
+
+    @SneakyThrows
+    @Override
+    public void reconnectSocket() {
+        log.info("reconnect websocket");
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            HttpUriRequest request = new HttpPost(websocketUrl + updateWebsocketSuffix);
+            client.execute(request);
+        }
     }
 
 }
