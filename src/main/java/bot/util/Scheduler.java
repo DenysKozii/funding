@@ -62,107 +62,107 @@ public class Scheduler {
         log.info("close limit finished");
     }
 
-    @Scheduled(cron = "0 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.reconnect.0}", zone = "GMT+0")
     public void reconnect0() {
         trade.reconnectSocket();
     }
 
-    @Scheduled(cron = "57 59 23 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.open.0}", zone = "GMT+0")
     public void open0() {
         open();
     }
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.0}", zone = "GMT+0")
     public void close0() {
         closeLimit();
     }
 
-    @Scheduled(cron = "10 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.010}", zone = "GMT+0")
     public void close010() {
         close();
     }
 
-    @Scheduled(cron = "15 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.015}", zone = "GMT+0")
     public void close015() {
         close();
     }
 
-    @Scheduled(cron = "30 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.030}", zone = "GMT+0")
     public void close030() {
         close();
     }
 
-    @Scheduled(cron = "59 0 0 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.059}", zone = "GMT+0")
     public void close059() {
         close();
     }
 
-    @Scheduled(cron = "0 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.reconnect.8}", zone = "GMT+0")
     public void reconnect8() {
         trade.reconnectSocket();
     }
 
-    @Scheduled(cron = "57 59 7 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.open.8}", zone = "GMT+0")
     public void open8() {
         open();
     }
 
-    @Scheduled(cron = "0 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.8}", zone = "GMT+0")
     public void close8() {
         closeLimit();
     }
 
-    @Scheduled(cron = "10 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.810}", zone = "GMT+0")
     public void close810() {
         close();
     }
 
-    @Scheduled(cron = "15 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.815}", zone = "GMT+0")
     public void close815() {
         close();
     }
 
-    @Scheduled(cron = "30 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.830}", zone = "GMT+0")
     public void close830() {
         close();
     }
 
-    @Scheduled(cron = "59 0 8 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.859}", zone = "GMT+0")
     public void close859() {
         close();
     }
 
-    @Scheduled(cron = "0 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.reconnect.16}", zone = "GMT+0")
     public void reconnect16() {
         trade.reconnectSocket();
     }
 
-    @Scheduled(cron = "57 59 15 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.open.16}", zone = "GMT+0")
     public void open16() {
         open();
     }
 
-    @Scheduled(cron = "0 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.16}", zone = "GMT+0")
     public void close16() {
         closeLimit();
     }
 
-    @Scheduled(cron = "10 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.1610}", zone = "GMT+0")
     public void close1610() {
         close();
     }
 
-    @Scheduled(cron = "15 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.1615}", zone = "GMT+0")
     public void close1615() {
         close();
     }
 
-    @Scheduled(cron = "30 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.1630}", zone = "GMT+0")
     public void close1630() {
         close();
     }
 
-    @Scheduled(cron = "59 0 16 * * *", zone = "GMT+0")
+    @Scheduled(cron = "${cron.close.1659}", zone = "GMT+0")
     public void close1659() {
         close();
     }
