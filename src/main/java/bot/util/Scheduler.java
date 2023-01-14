@@ -46,19 +46,19 @@ public class Scheduler {
     private void open() {
         trade.updateFunding();
         log.info("open started");
-        connection.getClientFutures().forEach(trade::open);
+        connection.getClientFutures().parallelStream().forEach(trade::open);
         log.info("open finished");
     }
 
     private void close() {
         log.info("close market started");
-        connection.getClientFutures().forEach(trade::close);
+        connection.getClientFutures().parallelStream().forEach(trade::close);
         log.info("close market finished");
     }
 
     private void closeLimit() {
         log.info("close limit started");
-        connection.getClientFutures().forEach(trade::closeLimit);
+        connection.getClientFutures().parallelStream().forEach(trade::closeLimit);
         log.info("close limit finished");
     }
 
