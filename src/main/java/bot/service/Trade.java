@@ -1,6 +1,6 @@
 package bot.service;
 
-import bot.dto.SettingsDto;
+import bot.dto.ProfitLevel;
 import bot.binance.SyncRequestClient;
 
 import java.util.List;
@@ -15,17 +15,13 @@ public interface Trade {
 
     void sendMarketOrder(SyncRequestClient clientFutures);
 
-    boolean sendLimitOrder(SyncRequestClient clientFutures, int round);
+    boolean sendLimitOrder(SyncRequestClient clientFutures, int round, ProfitLevel profitLevel);
 
     void updateFunding();
-
-    void logParameters();
 
     List<String> getFunding();
 
     double getAccountBalance(SyncRequestClient clientFutures);
-
-    void updateSettings(SettingsDto settings);
 
     void reconnectSocket();
 

@@ -1,8 +1,8 @@
 package bot.service.impl;
 
 import bot.binance.*;
+import bot.dto.LeverageLevel;
 import bot.dto.ProfitLevel;
-import bot.dto.SettingsDto;
 import bot.service.Trade;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -36,9 +36,6 @@ public class TradeImpl implements Trade {
     final String dateFormatPattern;
     final String spliterator;
     final String updateWebsocketSuffix;
-    Double fundingLimit;
-    Double profitLimit;
-    Integer leverage;
     String symbol;
     Double rate;
     Double price;
@@ -51,9 +48,6 @@ public class TradeImpl implements Trade {
     @Autowired
     public TradeImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
-                     @Value("${funding.limit}") Double fundingLimit,
-                     @Value("${profit.limit}") Double profitLimit,
-                     @Value("${leverage}") Integer leverage,
                      @Value("${symbol.default}") String symbol,
                      @Value("${round.start}") Integer roundStart,
                      @Value("${date.format.pattern}") String dateFormatPattern,
@@ -61,9 +55,6 @@ public class TradeImpl implements Trade {
                      @Value("${spliterator}") String spliterator) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
-        this.fundingLimit = fundingLimit;
-        this.profitLimit = profitLimit;
-        this.leverage = leverage;
         this.symbol = symbol;
         this.roundStart = roundStart;
         this.dateFormatPattern = dateFormatPattern;
@@ -75,8 +66,9 @@ public class TradeImpl implements Trade {
     @SneakyThrows
     public void open(SyncRequestClient clientFutures) {
         responsePrice = 0.0;
-        if (Math.abs(rate) < fundingLimit) {
-            log.info("rate {} is lower than limit {}", rate, fundingLimit);
+        ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
+        if (ProfitLevel.REJECT.equals(profitLevel)) {
+            log.info("rate {} is lower than limit {}", rate, profitLevel.getFunding());
             return;
         }
         try {
@@ -85,6 +77,7 @@ public class TradeImpl implements Trade {
         }
 
         double accountBalance = getAccountBalance(clientFutures);
+        int leverage = LeverageLevel.getLeverage(accountBalance);
         clientFutures.changeInitialLeverage(symbol, leverage);
         quantity = accountBalance * tradePercentage;
         quantity *= leverage;
@@ -127,14 +120,8 @@ public class TradeImpl implements Trade {
             int round = price > 1 ? 4 : roundStart;
             round = price > 100 ? 3 : round;
             double absoluteRate = Math.abs(rate);
-            if (absoluteRate < ProfitLevel.LOW.getFunding()) {
-                profitLimit = ProfitLevel.LOW.getProfit();
-            } else if (absoluteRate < ProfitLevel.MEDIUM.getFunding()) {
-                profitLimit = ProfitLevel.MEDIUM.getProfit();
-            } else if (absoluteRate < ProfitLevel.HIGH.getFunding()) {
-                profitLimit = ProfitLevel.HIGH.getProfit();
-            }
-            while (!sendLimitOrder(clientFutures, round) && round > 0) {
+            ProfitLevel profitLevel = ProfitLevel.getProfitLevel(absoluteRate);
+            while (!sendLimitOrder(clientFutures, round, profitLevel) && round > 0) {
                 round--;
             }
         } else {
@@ -143,17 +130,17 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public boolean sendLimitOrder(SyncRequestClient clientFutures, int round) {
+    public boolean sendLimitOrder(SyncRequestClient clientFutures, int round, ProfitLevel profitLevel) {
         try {
             OrderSide side;
             if (OrderSide.BUY.equals(orderSide)) {
                 side = OrderSide.SELL;
-                price = new BigDecimal(responsePrice * (1 + rate + profitLimit))
+                price = new BigDecimal(responsePrice * (1 + rate + profitLevel.getProfit()))
                         .setScale(round, RoundingMode.HALF_UP)
                         .doubleValue();
             } else {
                 side = OrderSide.BUY;
-                price = new BigDecimal(responsePrice * (1 + rate - profitLimit))
+                price = new BigDecimal(responsePrice * (1 + rate - profitLevel.getProfit()))
                         .setScale(round, RoundingMode.HALF_DOWN)
                         .doubleValue();
             }
@@ -194,15 +181,6 @@ public class TradeImpl implements Trade {
 
     @Override
     @SneakyThrows
-    public void logParameters() {
-        getFunding();
-        log.info("leverage = {}", leverage);
-        log.info("profit limit = {}", profitLimit);
-        log.info("funding rate limit = {}", fundingLimit);
-    }
-
-    @Override
-    @SneakyThrows
     public List<String> getFunding() {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             HttpUriRequest request = new HttpGet(websocketUrl);
@@ -224,12 +202,6 @@ public class TradeImpl implements Trade {
     public double getAccountBalance(SyncRequestClient clientFutures) {
         AccountInformation accountInformation = clientFutures.getAccountInformation();
         return accountInformation.getAvailableBalance().doubleValue();
-    }
-
-    @Override
-    public void updateSettings(SettingsDto settings) {
-        leverage = settings.getLeverage();
-        fundingLimit = settings.getFundingLimit();
     }
 
     @SneakyThrows
