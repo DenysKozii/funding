@@ -95,6 +95,7 @@ public class TradeImpl implements Trade {
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
         log.info("open quantity = {}, rate = {}, order side = {}", positionQuantity, rate, orderSide);
         sendMarketOrder(clientFutures);
+        closeLimit(clientFutures);
     }
 
     @Override

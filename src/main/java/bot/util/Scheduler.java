@@ -56,12 +56,6 @@ public class Scheduler {
         log.info("close market finished");
     }
 
-    private void closeLimit() {
-        log.info("close limit started");
-        connection.getClientFutures().parallelStream().forEach(trade::closeLimit);
-        log.info("close limit finished");
-    }
-
     @Scheduled(cron = "${cron.reconnect.0}", zone = "GMT+0")
     public void reconnect0() {
         trade.reconnectSocket();
@@ -70,11 +64,6 @@ public class Scheduler {
     @Scheduled(cron = "${cron.open.0}", zone = "GMT+0")
     public void open0() {
         open();
-    }
-
-    @Scheduled(cron = "${cron.close.0}", zone = "GMT+0")
-    public void close0() {
-        closeLimit();
     }
 
     @Scheduled(cron = "${cron.close.010}", zone = "GMT+0")
@@ -107,11 +96,6 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "${cron.close.8}", zone = "GMT+0")
-    public void close8() {
-        closeLimit();
-    }
-
     @Scheduled(cron = "${cron.close.810}", zone = "GMT+0")
     public void close810() {
         close();
@@ -140,11 +124,6 @@ public class Scheduler {
     @Scheduled(cron = "${cron.open.16}", zone = "GMT+0")
     public void open16() {
         open();
-    }
-
-    @Scheduled(cron = "${cron.close.16}", zone = "GMT+0")
-    public void close16() {
-        closeLimit();
     }
 
     @Scheduled(cron = "${cron.close.1610}", zone = "GMT+0")
