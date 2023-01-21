@@ -66,11 +66,6 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "${cron.close.010}", zone = "GMT+0")
-    public void close010() {
-        close();
-    }
-
     @Scheduled(cron = "${cron.close.015}", zone = "GMT+0")
     public void close015() {
         close();
@@ -96,11 +91,6 @@ public class Scheduler {
         open();
     }
 
-    @Scheduled(cron = "${cron.close.810}", zone = "GMT+0")
-    public void close810() {
-        close();
-    }
-
     @Scheduled(cron = "${cron.close.815}", zone = "GMT+0")
     public void close815() {
         close();
@@ -124,11 +114,6 @@ public class Scheduler {
     @Scheduled(cron = "${cron.open.16}", zone = "GMT+0")
     public void open16() {
         open();
-    }
-
-    @Scheduled(cron = "${cron.close.1610}", zone = "GMT+0")
-    public void close1610() {
-        close();
     }
 
     @Scheduled(cron = "${cron.close.1615}", zone = "GMT+0")
