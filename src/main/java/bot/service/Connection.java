@@ -9,6 +9,6 @@ public interface Connection {
 
     String addCredentials(CredentialsDto credentials);
 
-    List<SyncRequestClient> getClientFutures();
+    List<SyncRequestClient> getClients();
 
 }

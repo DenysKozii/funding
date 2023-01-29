@@ -29,7 +29,7 @@ public class ConnectionImpl implements Connection {
 
     CredentialsRepository credentialsRepository;
 
-    List<SyncRequestClient> clientFutures = new ArrayList<>();
+    List<SyncRequestClient> clients = new ArrayList<>();
 
     @Autowired
     public ConnectionImpl(CredentialsRepository credentialsRepository) {
@@ -38,10 +38,10 @@ public class ConnectionImpl implements Connection {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
-        credentialsRepository.findAll().forEach(credentials -> clientFutures.add(BinanceApiInternalFactory
+        credentialsRepository.findAll().forEach(credentials -> clients.add(BinanceApiInternalFactory
                 .getInstance()
                 .createSyncRequestClient(credentials.getKey(), credentials.getSecret(), new RequestOptions())));
-        clientFutures.forEach(client -> log.info("connected to an account with balance = {}",
+        clients.forEach(client -> log.info("connected to an account with balance = {}",
                 client.getAccountInformation().getAvailableBalance()));
     }
 
@@ -50,16 +50,18 @@ public class ConnectionImpl implements Connection {
         if (!credentialsRepository.existsById(credentials.getKey())) {
             String key = credentials.getKey();
             String secret = credentials.getSecret();
+            String name = credentials.getName();
             try {
                 SyncRequestClient client = BinanceApiInternalFactory.getInstance()
                         .createSyncRequestClient(key, secret, new RequestOptions());
-                log.info("connected to an account with balance = {}", client.getAccountInformation().getAvailableBalance());
-                clientFutures.add(client);
+                log.info("connected to an account with balance = {}",
+                        client.getAccountInformation().getAvailableBalance());
+                clients.add(client);
             } catch (BinanceApiException binanceApiException) {
                 log.error(binanceApiException.getMessage());
                 return binanceApiException.getMessage();
             }
-            credentialsRepository.save(new Credentials(key, secret, credentials.getName()));
+            credentialsRepository.save(new Credentials(key, secret, name));
             return "connected";
         }
         return "connection already exists";

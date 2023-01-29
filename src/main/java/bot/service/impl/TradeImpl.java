@@ -64,7 +64,7 @@ public class TradeImpl implements Trade {
 
     @Override
     @SneakyThrows
-    public void open(SyncRequestClient clientFutures) {
+    public void open(SyncRequestClient client) {
         responsePrice = 0.0;
         ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
         if (ProfitLevel.REJECT.equals(profitLevel)) {
@@ -72,13 +72,13 @@ public class TradeImpl implements Trade {
             return;
         }
         try {
-            clientFutures.changeMarginType(symbol, MarginType.ISOLATED);
+            client.changeMarginType(symbol, MarginType.ISOLATED);
         } catch (Exception ignored) {
         }
 
-        double accountBalance = getAccountBalance(clientFutures);
+        double accountBalance = getAccountBalance(client);
         int leverage = LeverageLevel.getLeverage(accountBalance);
-        clientFutures.changeInitialLeverage(symbol, leverage);
+        client.changeInitialLeverage(symbol, leverage);
         quantity = accountBalance * tradePercentage;
         quantity *= leverage;
         quantity /= price;
@@ -87,15 +87,15 @@ public class TradeImpl implements Trade {
                 String.format("%.1f", quantity);
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
         log.info("open quantity = {}, rate = {}, order side = {}", positionQuantity, rate, orderSide);
-        sendMarketOrder(clientFutures);
-        closeLimit(clientFutures);
+        sendMarketOrder(client);
+        closeLimit(client);
     }
 
     @Override
-    public void close(SyncRequestClient clientFutures) {
-        Optional<Position> position = clientFutures.getAccountInformation().getPositions()
+    public void close(SyncRequestClient client) {
+        Optional<Position> position = client.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
-        clientFutures.cancelAllOpenOrder(symbol);
+        client.cancelAllOpenOrder(symbol);
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
             log.info("position {} is already closed", symbol);
             return;
@@ -109,19 +109,19 @@ public class TradeImpl implements Trade {
         if (position.get().getPositionAmt().doubleValue() < 0) {
             positionQuantity = String.valueOf(-1 * position.get().getPositionAmt().doubleValue());
         }
-        sendMarketOrder(clientFutures);
+        sendMarketOrder(client);
     }
 
     @Override
-    public void closeLimit(SyncRequestClient clientFutures) {
-        Optional<Position> position = clientFutures.getAccountInformation().getPositions()
+    public void closeLimit(SyncRequestClient client) {
+        Optional<Position> position = client.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         if (position.isPresent() && position.get().getPositionAmt() != null) {
             int round = price > 1 ? 4 : roundStart;
             round = price > 100 ? 3 : round;
             double absoluteRate = Math.abs(rate);
             ProfitLevel profitLevel = ProfitLevel.getProfitLevel(absoluteRate);
-            while (!sendLimitOrder(clientFutures, round, profitLevel) && round > 0) {
+            while (!sendLimitOrder(client, round, profitLevel) && round > 0) {
                 round--;
             }
         } else {
@@ -130,7 +130,7 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public boolean sendLimitOrder(SyncRequestClient clientFutures, int round, ProfitLevel profitLevel) {
+    public boolean sendLimitOrder(SyncRequestClient client, int round, ProfitLevel profitLevel) {
         try {
             OrderSide side;
             if (OrderSide.BUY.equals(orderSide)) {
@@ -144,7 +144,7 @@ public class TradeImpl implements Trade {
                         .setScale(round, RoundingMode.HALF_DOWN)
                         .doubleValue();
             }
-            Order order = clientFutures.postOrder(
+            Order order = client.postOrder(
                     symbol, side, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
                     price.toString(), null, null, null, null, null, null, null, null,
                     NewOrderRespType.RESULT);
@@ -157,8 +157,8 @@ public class TradeImpl implements Trade {
     }
 
     @Override
-    public void sendMarketOrder(SyncRequestClient clientFutures) {
-        Order order = clientFutures.postOrder(
+    public void sendMarketOrder(SyncRequestClient client) {
+        Order order = client.postOrder(
                 symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
@@ -174,9 +174,6 @@ public class TradeImpl implements Trade {
         symbol = funding.get(0);
         rate = Double.parseDouble(funding.get(1));
         price = Double.parseDouble(funding.get(2));
-        log.info("symbol = {}", symbol);
-        log.info("rate = {}", rate);
-        log.info("price = {}", price);
     }
 
     @Override
@@ -190,17 +187,17 @@ public class TradeImpl implements Trade {
             List<String> elements = Collections.emptyList();
             while ((line = bufReader.readLine()) != null) {
                 elements = Arrays.asList(line.split(spliterator));
-                log.info("{}: rate = {}, price = {}", elements.get(0),
-                        Double.parseDouble(elements.get(1)),
-                        Double.parseDouble(elements.get(2)));
+                log.info("symbol = {}", elements.get(0));
+                log.info("rate = {}", elements.get(1));
+                log.info("price = {}", elements.get(2));
             }
             return elements;
         }
     }
 
     @Override
-    public double getAccountBalance(SyncRequestClient clientFutures) {
-        AccountInformation accountInformation = clientFutures.getAccountInformation();
+    public double getAccountBalance(SyncRequestClient client) {
+        AccountInformation accountInformation = client.getAccountInformation();
         return accountInformation.getAvailableBalance().doubleValue();
     }
 

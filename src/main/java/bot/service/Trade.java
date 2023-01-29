@@ -7,21 +7,21 @@ import java.util.List;
 
 public interface Trade {
 
-    void open(SyncRequestClient clientFutures);
+    void open(SyncRequestClient client);
 
-    void close(SyncRequestClient clientFutures);
+    void close(SyncRequestClient client);
 
-    void closeLimit(SyncRequestClient clientFutures);
+    void closeLimit(SyncRequestClient client);
 
-    void sendMarketOrder(SyncRequestClient clientFutures);
+    void sendMarketOrder(SyncRequestClient client);
 
-    boolean sendLimitOrder(SyncRequestClient clientFutures, int round, ProfitLevel profitLevel);
+    boolean sendLimitOrder(SyncRequestClient client, int round, ProfitLevel profitLevel);
 
     void updateFunding();
 
     List<String> getFunding();
 
-    double getAccountBalance(SyncRequestClient clientFutures);
+    double getAccountBalance(SyncRequestClient client);
 
     void reconnectSocket();
 

@@ -28,7 +28,9 @@ public class Scheduler {
     Connection connection;
 
     @Autowired
-    public Scheduler(@Value("${heroku.url}") String herokuUrl, Trade trade, Connection connection) {
+    public Scheduler(@Value("${heroku.url}") String herokuUrl,
+                     Trade trade,
+                     Connection connection) {
         this.herokuUrl = herokuUrl;
         this.trade = trade;
         this.connection = connection;
@@ -46,13 +48,13 @@ public class Scheduler {
     private void open() {
         trade.updateFunding();
         log.info("open started");
-        connection.getClientFutures().parallelStream().forEach(trade::open);
+        connection.getClients().parallelStream().forEach(trade::open);
         log.info("open finished");
     }
 
     private void close() {
         log.info("close market started");
-        connection.getClientFutures().parallelStream().forEach(trade::close);
+        connection.getClients().parallelStream().forEach(trade::close);
         log.info("close market finished");
     }
 
