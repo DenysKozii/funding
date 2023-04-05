@@ -41,7 +41,7 @@ public class ConnectionImpl implements Connection {
         credentialsRepository.findAll().forEach(credentials -> clients.add(BinanceApiInternalFactory
                 .getInstance()
                 .createSyncRequestClient(credentials.getKey(), credentials.getSecret(), new RequestOptions())));
-        clients.forEach(client -> log.info("connected to an account with balance = {}",
+        clients.forEach(client -> log.info("connected to an account with futures balance = {}",
                 client.getAccountInformation().getAvailableBalance()));
     }
 
@@ -54,7 +54,7 @@ public class ConnectionImpl implements Connection {
             try {
                 SyncRequestClient client = BinanceApiInternalFactory.getInstance()
                         .createSyncRequestClient(key, secret, new RequestOptions());
-                log.info("connected to an account with balance = {}",
+                log.info("connected to an account with futures balance = {}",
                         client.getAccountInformation().getAvailableBalance());
                 clients.add(client);
             } catch (BinanceApiException binanceApiException) {
