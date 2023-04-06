@@ -2,7 +2,7 @@ package bot.api;
 
 import bot.dto.CredentialsDto;
 import bot.service.Connection;
-import bot.service.Trade;
+import bot.service.Trading;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserRestController {
 
     Connection connection;
-    Trade trade;
+    Trading trading;
 
     @GetMapping
     public String alive() {
@@ -29,7 +29,7 @@ public class UserRestController {
 
     @GetMapping("reconnect")
     public void reconnect() {
-        trade.reconnectSocket();
+        trading.reconnectSocket();
     }
 
 }

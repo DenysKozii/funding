@@ -7,17 +7,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Document("credentials")
-public class Credentials {
+@Document("fundings")
+public class Funding {
 
     @Id
     String id;
 
-    String secret;
+    String date;
 
-    String key;
+    String symbol;
 
-    String name;
+    Double value;
 
 }

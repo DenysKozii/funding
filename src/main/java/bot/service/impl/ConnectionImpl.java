@@ -46,11 +46,11 @@ public class ConnectionImpl implements Connection {
     }
 
     @Override
-    public String addCredentials(CredentialsDto credentials) {
-        if (!credentialsRepository.existsById(credentials.getKey())) {
-            String key = credentials.getKey();
-            String secret = credentials.getSecret();
-            String name = credentials.getName();
+    public String addCredentials(CredentialsDto credentialsDto) {
+        if (!credentialsRepository.existsById(credentialsDto.getKey())) {
+            String key = credentialsDto.getKey();
+            String secret = credentialsDto.getSecret();
+            String name = credentialsDto.getName();
             try {
                 SyncRequestClient client = BinanceApiInternalFactory.getInstance()
                         .createSyncRequestClient(key, secret, new RequestOptions());
@@ -61,7 +61,12 @@ public class ConnectionImpl implements Connection {
                 log.error(binanceApiException.getMessage());
                 return binanceApiException.getMessage();
             }
-            credentialsRepository.save(new Credentials(key, secret, name));
+            Credentials credentials = Credentials.builder()
+                    .key(key)
+                    .secret(secret)
+                    .name(name)
+                    .build();
+            credentialsRepository.save(credentials);
             return "connected";
         }
         return "connection already exists";

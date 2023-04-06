@@ -3,7 +3,9 @@ package bot.service.impl;
 import bot.binance.*;
 import bot.dto.LeverageLevel;
 import bot.dto.ProfitLevel;
-import bot.service.Trade;
+import bot.repository.FundingRepository;
+import bot.repository.TradeRepository;
+import bot.service.Trading;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -23,13 +25,16 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Data
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TradeImpl implements Trade {
+public class TradingImpl implements Trading {
+
+    final static SimpleDateFormat FORMATTER = new SimpleDateFormat("dd-MM-yyyy/HH:mm:ss");
 
     final String websocketUrl;
     final Double tradePercentage;
@@ -46,7 +51,7 @@ public class TradeImpl implements Trade {
     Integer roundStart;
 
     @Autowired
-    public TradeImpl(@Value("${websocket.url}") String websocketUrl,
+    public TradingImpl(@Value("${websocket.url}") String websocketUrl,
                      @Value("${trade.percentage}") Double tradePercentage,
                      @Value("${symbol.default}") String symbol,
                      @Value("${round.start}") Integer roundStart,

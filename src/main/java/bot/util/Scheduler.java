@@ -1,7 +1,7 @@
 package bot.util;
 
 import bot.service.Connection;
-import bot.service.Trade;
+import bot.service.Trading;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +24,15 @@ import java.io.IOException;
 public class Scheduler {
 
     String herokuUrl;
-    Trade trade;
+    Trading trading;
     Connection connection;
 
     @Autowired
     public Scheduler(@Value("${heroku.url}") String herokuUrl,
-                     Trade trade,
+                     Trading trading,
                      Connection connection) {
         this.herokuUrl = herokuUrl;
-        this.trade = trade;
+        this.trading = trading;
         this.connection = connection;
     }
 
@@ -42,25 +42,25 @@ public class Scheduler {
             HttpUriRequest request = new HttpGet(herokuUrl);
             client.execute(request);
         }
-        trade.getFunding();
+        trading.getFunding();
     }
 
     private void open() {
-        trade.updateFunding();
+        trading.updateFunding();
         log.info("open started");
-        connection.getClients().parallelStream().forEach(trade::open);
+        connection.getClients().parallelStream().forEach(trading::open);
         log.info("open finished");
     }
 
     private void close() {
         log.info("close market started");
-        connection.getClients().parallelStream().forEach(trade::close);
+        connection.getClients().parallelStream().forEach(trading::close);
         log.info("close market finished");
     }
 
     @Scheduled(cron = "${cron.reconnect.0}", zone = "GMT+0")
     public void reconnect0() {
-        trade.reconnectSocket();
+        trading.reconnectSocket();
     }
 
     @Scheduled(cron = "${cron.open.0}", zone = "GMT+0")
@@ -85,7 +85,7 @@ public class Scheduler {
 
     @Scheduled(cron = "${cron.reconnect.8}", zone = "GMT+0")
     public void reconnect8() {
-        trade.reconnectSocket();
+        trading.reconnectSocket();
     }
 
     @Scheduled(cron = "${cron.open.8}", zone = "GMT+0")
@@ -110,7 +110,7 @@ public class Scheduler {
 
     @Scheduled(cron = "${cron.reconnect.16}", zone = "GMT+0")
     public void reconnect16() {
-        trade.reconnectSocket();
+        trading.reconnectSocket();
     }
 
     @Scheduled(cron = "${cron.open.16}", zone = "GMT+0")

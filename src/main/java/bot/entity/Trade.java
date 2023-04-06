@@ -5,19 +5,27 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 @Data
 @Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Document("credentials")
-public class Credentials {
+@Document("trades")
+public class Trade {
 
     @Id
     String id;
 
-    String secret;
+    Date date;
 
-    String key;
+    User user;
 
-    String name;
+    Double balanceBefore;
+
+    Double balanceAfter;
+
+    Double profit;
 
 }

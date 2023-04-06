@@ -5,7 +5,7 @@ import bot.binance.SyncRequestClient;
 
 import java.util.List;
 
-public interface Trade {
+public interface Trading {
 
     void open(SyncRequestClient client);
 
