@@ -22,4 +22,6 @@ public class Funding {
 
     Double value;
 
+    Boolean skip;
+
 }

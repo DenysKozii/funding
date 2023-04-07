@@ -3,6 +3,8 @@ package bot.service.impl;
 import bot.binance.*;
 import bot.dto.LeverageLevel;
 import bot.dto.ProfitLevel;
+import bot.entity.Funding;
+import bot.entity.Trade;
 import bot.repository.FundingRepository;
 import bot.repository.TradeRepository;
 import bot.service.Trading;
@@ -34,8 +36,7 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TradingImpl implements Trading {
 
-    final static SimpleDateFormat FORMATTER = new SimpleDateFormat("dd-MM-yyyy/HH:mm:ss");
-
+    final SimpleDateFormat formatter;
     final String websocketUrl;
     final Double tradePercentage;
     final String dateFormatPattern;
@@ -49,15 +50,20 @@ public class TradingImpl implements Trading {
     String positionQuantity;
     OrderSide orderSide;
     Integer roundStart;
+    Double openBalance;
+    TradeRepository tradeRepository;
+    FundingRepository fundingRepository;
 
     @Autowired
     public TradingImpl(@Value("${websocket.url}") String websocketUrl,
-                     @Value("${trade.percentage}") Double tradePercentage,
-                     @Value("${symbol.default}") String symbol,
-                     @Value("${round.start}") Integer roundStart,
-                     @Value("${date.format.pattern}") String dateFormatPattern,
-                     @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
-                     @Value("${spliterator}") String spliterator) {
+                       @Value("${trade.percentage}") Double tradePercentage,
+                       @Value("${symbol.default}") String symbol,
+                       @Value("${round.start}") Integer roundStart,
+                       @Value("${date.format.pattern}") String dateFormatPattern,
+                       @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
+                       @Value("${spliterator}") String spliterator,
+                       TradeRepository tradeRepository,
+                       FundingRepository fundingRepository) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.symbol = symbol;
@@ -65,6 +71,9 @@ public class TradingImpl implements Trading {
         this.dateFormatPattern = dateFormatPattern;
         this.updateWebsocketSuffix = updateWebsocketSuffix;
         this.spliterator = spliterator;
+        this.tradeRepository = tradeRepository;
+        this.fundingRepository = fundingRepository;
+        this.formatter = new SimpleDateFormat(dateFormatPattern);
     }
 
     @Override
@@ -91,6 +100,7 @@ public class TradingImpl implements Trading {
                 String.valueOf(quantity.intValue()) :
                 String.format("%.1f", quantity);
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
+        openBalance = accountBalance;
         log.info("open quantity = {}, rate = {}, order side = {}", positionQuantity, rate, orderSide);
         sendMarketOrder(client);
         closeLimit(client);
@@ -103,6 +113,17 @@ public class TradingImpl implements Trading {
         client.cancelAllOpenOrder(symbol);
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
             log.info("position {} is already closed", symbol);
+            if (openBalance != 0.0) {
+                double accountBalance = getAccountBalance(client);
+                Trade trade = Trade.builder()
+                        .date(formatter.format(new Date()))
+                        .balanceBefore(openBalance)
+                        .balanceAfter(accountBalance)
+                        .profit(accountBalance / openBalance)
+                        .build();
+                tradeRepository.save(trade);
+                openBalance = 0.0;
+            }
             return;
         }
 
@@ -175,10 +196,19 @@ public class TradingImpl implements Trading {
     @Override
     @SneakyThrows
     public void updateFunding() {
-        List<String> funding = getFunding();
-        symbol = funding.get(0);
-        rate = Double.parseDouble(funding.get(1));
-        price = Double.parseDouble(funding.get(2));
+        List<String> elements = getFunding();
+        symbol = elements.get(0);
+        rate = Double.parseDouble(elements.get(1));
+        price = Double.parseDouble(elements.get(2));
+        ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
+
+        Funding funding = Funding.builder()
+                .date(formatter.format(new Date()))
+                .value(rate)
+                .symbol(symbol)
+                .skip(ProfitLevel.REJECT.equals(profitLevel))
+                .build();
+        fundingRepository.save(funding);
     }
 
     @Override

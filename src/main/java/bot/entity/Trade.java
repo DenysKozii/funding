@@ -5,8 +5,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-
 @Data
 @Builder
 @RequiredArgsConstructor
@@ -18,7 +16,7 @@ public class Trade {
     @Id
     String id;
 
-    Date date;
+    String date;
 
     User user;
 
