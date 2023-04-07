@@ -1,12 +1,16 @@
 package bot.api;
 
 import bot.dto.CredentialsDto;
+import bot.dto.FundingDto;
+import bot.dto.TradeDto;
 import bot.service.Connection;
 import bot.service.Trading;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -30,6 +34,16 @@ public class UserRestController {
     @GetMapping("reconnect")
     public void reconnect() {
         trading.reconnectSocket();
+    }
+
+    @GetMapping("trades")
+    public List<TradeDto> getTrades() {
+        return trading.getTrades();
+    }
+
+    @GetMapping("fundings")
+    public List<FundingDto> getFundingss() {
+        return trading.getFundings();
     }
 
 }

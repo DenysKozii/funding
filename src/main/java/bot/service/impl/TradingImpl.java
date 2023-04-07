@@ -1,8 +1,10 @@
 package bot.service.impl;
 
 import bot.binance.*;
+import bot.dto.FundingDto;
 import bot.dto.LeverageLevel;
 import bot.dto.ProfitLevel;
+import bot.dto.TradeDto;
 import bot.entity.Funding;
 import bot.entity.Trade;
 import bot.repository.FundingRepository;
@@ -244,6 +246,16 @@ public class TradingImpl implements Trading {
             HttpUriRequest request = new HttpPost(websocketUrl + updateWebsocketSuffix);
             client.execute(request);
         }
+    }
+
+    @Override
+    public List<TradeDto> getTrades() {
+        return null;
+    }
+
+    @Override
+    public List<FundingDto> getFundings() {
+        return null;
     }
 
 }
