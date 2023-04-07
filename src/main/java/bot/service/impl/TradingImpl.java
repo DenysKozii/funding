@@ -7,6 +7,8 @@ import bot.dto.ProfitLevel;
 import bot.dto.TradeDto;
 import bot.entity.Funding;
 import bot.entity.Trade;
+import bot.mapper.FundingMapper;
+import bot.mapper.TradeMapper;
 import bot.repository.FundingRepository;
 import bot.repository.TradeRepository;
 import bot.service.Trading;
@@ -31,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -250,12 +253,12 @@ public class TradingImpl implements Trading {
 
     @Override
     public List<TradeDto> getTrades() {
-        return null;
+        return tradeRepository.findAll().stream().map(TradeMapper.INSTANCE::mapToDto).collect(Collectors.toList());
     }
 
     @Override
     public List<FundingDto> getFundings() {
-        return null;
+        return fundingRepository.findAll().stream().map(FundingMapper.INSTANCE::mapToDto).collect(Collectors.toList());
     }
 
 }

@@ -1,17 +1,20 @@
 package bot.dto;
 
-import bot.entity.User;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TradeDto {
 
     String date;
 
-    User user;
+    String name;
 
     Double balanceBefore;
 
