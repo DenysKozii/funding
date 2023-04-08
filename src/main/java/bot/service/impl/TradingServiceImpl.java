@@ -1,14 +1,10 @@
 package bot.service.impl;
 
 import bot.binance.*;
-import bot.dto.FundingDto;
 import bot.dto.LeverageLevel;
 import bot.dto.ProfitLevel;
-import bot.dto.TradeDto;
 import bot.entity.Funding;
 import bot.entity.Trade;
-import bot.mapper.FundingMapper;
-import bot.mapper.TradeMapper;
 import bot.repository.FundingRepository;
 import bot.repository.TradeRepository;
 import bot.service.TradingService;
@@ -33,7 +29,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -251,16 +246,6 @@ public class TradingServiceImpl implements TradingService {
             HttpUriRequest request = new HttpPost(websocketUrl + updateWebsocketSuffix);
             client.execute(request);
         }
-    }
-
-    @Override
-    public List<TradeDto> getTrades() {
-        return tradeRepository.findAll().stream().map(TradeMapper.INSTANCE::mapToDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<FundingDto> getFundings() {
-        return fundingRepository.findAll().stream().map(FundingMapper.INSTANCE::mapToDto).collect(Collectors.toList());
     }
 
 }

@@ -1,6 +1,8 @@
 package bot.api;
 
+import bot.dto.FundingDto;
 import bot.dto.StatisticsDto;
+import bot.dto.TradeDto;
 import bot.service.StatisticsService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,17 @@ public class StatisticsRestController {
     @GetMapping
     List<StatisticsDto> getStatistics() {
         return statisticsService.getStatistics();
+    }
+
+
+    @GetMapping("trades")
+    List<TradeDto> getTrades() {
+        return statisticsService.getTrades();
+    }
+
+    @GetMapping("fundings")
+    List<FundingDto> getFundings() {
+        return statisticsService.getFundings();
     }
 
 }

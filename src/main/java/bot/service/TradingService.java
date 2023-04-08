@@ -1,9 +1,7 @@
 package bot.service;
 
-import bot.dto.FundingDto;
-import bot.dto.ProfitLevel;
 import bot.binance.SyncRequestClient;
-import bot.dto.TradeDto;
+import bot.dto.ProfitLevel;
 
 import java.util.List;
 
@@ -26,9 +24,5 @@ public interface TradingService {
     double getAccountBalance(SyncRequestClient client);
 
     void reconnectSocket();
-
-    List<TradeDto> getTrades();
-
-    List<FundingDto> getFundings();
 
 }
