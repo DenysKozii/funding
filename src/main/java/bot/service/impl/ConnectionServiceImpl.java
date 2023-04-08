@@ -45,7 +45,8 @@ public class ConnectionServiceImpl implements ConnectionService {
                         credentials.getSecret(),
                         credentials.getName(),
                         new RequestOptions())));
-        clients.forEach(client -> log.info("connected to an account with futures balance = {}",
+        clients.forEach(client -> log.info("Connected to an account {} with futures balance = {} USD",
+                client.getName(),
                 client.getAccountInformation().getAvailableBalance()));
     }
 
@@ -58,7 +59,8 @@ public class ConnectionServiceImpl implements ConnectionService {
             try {
                 SyncRequestClient client = BinanceApiInternalFactory.getInstance()
                         .createSyncRequestClient(key, secret, name, new RequestOptions());
-                log.info("connected to an account with futures balance = {}",
+                log.info("Connected to an account {} with futures balance = {} USD",
+                        client.getName(),
                         client.getAccountInformation().getAvailableBalance());
                 clients.add(client);
             } catch (BinanceApiException binanceApiException) {
@@ -71,8 +73,8 @@ public class ConnectionServiceImpl implements ConnectionService {
                     .name(name)
                     .build();
             credentialsRepository.save(credentials);
-            return "connected";
+            return "New connection created!";
         }
-        return "connection already exists";
+        return "Connection already exists!";
     }
 }

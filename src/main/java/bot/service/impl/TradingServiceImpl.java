@@ -55,15 +55,7 @@ public class TradingServiceImpl implements TradingService {
     FundingRepository fundingRepository;
 
     @Autowired
-    public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl,
-                              @Value("${trade.percentage}") Double tradePercentage,
-                              @Value("${symbol.default}") String symbol,
-                              @Value("${round.start}") Integer roundStart,
-                              @Value("${date.format.pattern}") String dateFormatPattern,
-                              @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
-                              @Value("${spliterator}") String spliterator,
-                              TradeRepository tradeRepository,
-                              FundingRepository fundingRepository) {
+    public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl, @Value("${trade.percentage}") Double tradePercentage, @Value("${symbol.default}") String symbol, @Value("${round.start}") Integer roundStart, @Value("${date.format.pattern}") String dateFormatPattern, @Value("${update.websocket.suffix}") String updateWebsocketSuffix, @Value("${spliterator}") String spliterator, TradeRepository tradeRepository, FundingRepository fundingRepository) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.symbol = symbol;
@@ -82,7 +74,7 @@ public class TradingServiceImpl implements TradingService {
         responsePrice = 0.0;
         ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
         if (ProfitLevel.REJECT.equals(profitLevel)) {
-            log.info("rate {} is lower than limit {}", rate, profitLevel.getFunding());
+            log.info("{}: rate {} is lower than limit {}", client.getName(), rate, profitLevel.getFunding());
             return;
         }
         try {
@@ -101,7 +93,7 @@ public class TradingServiceImpl implements TradingService {
                 String.format("%.1f", quantity);
         orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
         openBalance = accountBalance;
-        log.info("open quantity = {}, rate = {}, order side = {}", positionQuantity, rate, orderSide);
+        log.info("{}: open quantity = {}, rate = {}, order side = {}", client.getName(), positionQuantity, rate, orderSide);
         sendMarketOrder(client);
         closeLimit(client);
     }
@@ -112,7 +104,7 @@ public class TradingServiceImpl implements TradingService {
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         client.cancelAllOpenOrder(symbol);
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
-            log.info("position {} is already closed", symbol);
+            log.info("{}: position {} is already closed", client.getName(), symbol);
             if (openBalance != 0.0) {
                 double accountBalance = getAccountBalance(client);
 
@@ -156,7 +148,7 @@ public class TradingServiceImpl implements TradingService {
                 round--;
             }
         } else {
-            log.info("No positions for {}", symbol);
+            log.info("{}: no positions for {}", client.getName(), symbol);
         }
     }
 
@@ -179,7 +171,7 @@ public class TradingServiceImpl implements TradingService {
                     symbol, side, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
                     price.toString(), null, null, null, null, null, null, null, null,
                     NewOrderRespType.RESULT);
-            log.info("{} limit close with round = {} and price = {}", symbol, round, order.getPrice());
+            log.info("{}: {} limit close with round = {} and price = {}", client.getName(), symbol, round, order.getPrice());
             return true;
         } catch (BinanceApiException binanceApiException) {
             log.error(binanceApiException.getMessage());
@@ -195,7 +187,8 @@ public class TradingServiceImpl implements TradingService {
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
         positionQuantity = order.getExecutedQty().toString();
-        log.info("{} order sent with executed avg price = {} and quantity = {}", symbol, responsePrice, positionQuantity);
+        log.info("{}: {} order sent with executed avg price = {} and quantity = {}",
+                client.getName(), symbol, responsePrice, positionQuantity);
     }
 
     @Override
@@ -206,12 +199,7 @@ public class TradingServiceImpl implements TradingService {
         price = Double.parseDouble(elements.get(2));
         ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
 
-        Funding funding = Funding.builder()
-                .date(formatter.format(new Date()))
-                .rate(rate)
-                .symbol(symbol)
-                .skip(ProfitLevel.REJECT.equals(profitLevel))
-                .build();
+        Funding funding = Funding.builder().date(formatter.format(new Date())).rate(rate).symbol(symbol).skip(ProfitLevel.REJECT.equals(profitLevel)).build();
         fundingRepository.save(funding);
     }
 
@@ -226,9 +214,10 @@ public class TradingServiceImpl implements TradingService {
             List<String> elements = Collections.emptyList();
             while ((line = bufReader.readLine()) != null) {
                 elements = Arrays.asList(line.split(spliterator));
-                log.info("symbol = {}", elements.get(0));
-                log.info("rate = {}", elements.get(1));
-                log.info("price = {}", elements.get(2));
+                log.info("Funding with symbol: {}, rate: {}, price: {}",
+                        elements.get(0),
+                        elements.get(1),
+                        elements.get(2));
             }
             return elements;
         }
@@ -243,7 +232,7 @@ public class TradingServiceImpl implements TradingService {
     @Override
     @SneakyThrows
     public void reconnectSocket() {
-        log.info("reconnect websocket");
+        log.info("Reconnect websocket!");
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             HttpUriRequest request = new HttpPost(websocketUrl + updateWebsocketSuffix);
             client.execute(request);
