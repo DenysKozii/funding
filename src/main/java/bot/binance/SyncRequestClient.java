@@ -14,4 +14,6 @@ public interface SyncRequestClient {
 
     String getName();
 
+    Double getPercentage();
+
 }

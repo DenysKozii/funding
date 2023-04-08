@@ -16,4 +16,6 @@ public class CredentialsDto {
 
     String name;
 
+    Double percentage;
+
 }

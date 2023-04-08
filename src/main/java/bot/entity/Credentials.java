@@ -20,4 +20,6 @@ public class Credentials {
 
     String name;
 
+    Double percentage;
+
 }

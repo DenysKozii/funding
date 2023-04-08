@@ -38,7 +38,6 @@ public class TradingServiceImpl implements TradingService {
 
     final SimpleDateFormat formatter;
     final String websocketUrl;
-    final Double tradePercentage;
     final String dateFormatPattern;
     final String spliterator;
     final String updateWebsocketSuffix;
@@ -55,9 +54,15 @@ public class TradingServiceImpl implements TradingService {
     FundingRepository fundingRepository;
 
     @Autowired
-    public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl, @Value("${trade.percentage}") Double tradePercentage, @Value("${symbol.default}") String symbol, @Value("${round.start}") Integer roundStart, @Value("${date.format.pattern}") String dateFormatPattern, @Value("${update.websocket.suffix}") String updateWebsocketSuffix, @Value("${spliterator}") String spliterator, TradeRepository tradeRepository, FundingRepository fundingRepository) {
+    public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl,
+                              @Value("${symbol.default}") String symbol,
+                              @Value("${round.start}") Integer roundStart,
+                              @Value("${date.format.pattern}") String dateFormatPattern,
+                              @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
+                              @Value("${spliterator}") String spliterator,
+                              TradeRepository tradeRepository,
+                              FundingRepository fundingRepository) {
         this.websocketUrl = websocketUrl;
-        this.tradePercentage = tradePercentage;
         this.symbol = symbol;
         this.roundStart = roundStart;
         this.dateFormatPattern = dateFormatPattern;
@@ -85,7 +90,7 @@ public class TradingServiceImpl implements TradingService {
         double accountBalance = getAccountBalance(client);
         int leverage = LeverageLevel.getLeverage(accountBalance);
         client.changeInitialLeverage(symbol, leverage);
-        quantity = accountBalance * tradePercentage;
+        quantity = accountBalance * client.getPercentage();
         quantity *= leverage;
         quantity /= price;
         positionQuantity = quantity.intValue() > 0 ?

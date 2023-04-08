@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,15 @@ import java.util.List;
 public class ConnectionServiceImpl implements ConnectionService {
 
     CredentialsRepository credentialsRepository;
+    Double percentageMax;
 
     List<SyncRequestClient> clients = new ArrayList<>();
 
     @Autowired
-    public ConnectionServiceImpl(CredentialsRepository credentialsRepository) {
+    public ConnectionServiceImpl(CredentialsRepository credentialsRepository,
+                                 @Value("${trade.percentage}") Double percentageMax) {
         this.credentialsRepository = credentialsRepository;
+        this.percentageMax = percentageMax;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -44,6 +48,7 @@ public class ConnectionServiceImpl implements ConnectionService {
                         credentials.getKey(),
                         credentials.getSecret(),
                         credentials.getName(),
+                        credentials.getPercentage(),
                         new RequestOptions())));
         clients.forEach(client -> log.info("Connected to an account {} with futures balance = {} USD",
                 client.getName(),
@@ -52,15 +57,16 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Override
     public String addCredentials(CredentialsDto credentialsDto) {
-        if (!credentialsRepository.existsById(credentialsDto.getKey())) {
+        if (!credentialsRepository.existsByName(credentialsDto.getName())) {
             String key = credentialsDto.getKey();
             String secret = credentialsDto.getSecret();
             String name = credentialsDto.getName();
+            Double percentage = Math.max(Math.min(credentialsDto.getPercentage(), percentageMax), 0);
             try {
                 SyncRequestClient client = BinanceApiInternalFactory.getInstance()
-                        .createSyncRequestClient(key, secret, name, new RequestOptions());
+                        .createSyncRequestClient(key, secret, name, percentage, new RequestOptions());
                 log.info("Connected to an account {} with futures balance = {} USD",
-                        client.getName(),
+                        name,
                         client.getAccountInformation().getAvailableBalance());
                 clients.add(client);
             } catch (BinanceApiException binanceApiException) {
@@ -71,10 +77,13 @@ public class ConnectionServiceImpl implements ConnectionService {
                     .key(key)
                     .secret(secret)
                     .name(name)
+                    .percentage(percentage)
                     .build();
             credentialsRepository.save(credentials);
-            return "New connection created!";
+            return String.format("Connection with name %s successfully created!", credentialsDto.getName());
+
         }
-        return "Connection already exists!";
+        return String.format("Connection with name %s already exists!", credentialsDto.getName());
     }
+
 }
