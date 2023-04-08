@@ -17,9 +17,14 @@ public class UserRestController {
     ConnectionService connectionService;
     TradingService tradingService;
 
-    @PostMapping("credentials")
-    String addCredentials(@RequestBody CredentialsDto credentialsDto) {
-        return connectionService.addCredentials(credentialsDto);
+    @PostMapping("register")
+    String register(@RequestBody CredentialsDto credentialsDto) {
+        return connectionService.register(credentialsDto);
+    }
+
+    @PatchMapping("percentage")
+    boolean setPercentage(@RequestParam String name, @RequestParam Double percentage) {
+        return connectionService.setPercentage(name, percentage);
     }
 
     @GetMapping("reconnect")

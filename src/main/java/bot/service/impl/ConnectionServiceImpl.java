@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @Data
@@ -56,7 +57,7 @@ public class ConnectionServiceImpl implements ConnectionService {
     }
 
     @Override
-    public String addCredentials(CredentialsDto credentialsDto) {
+    public String register(CredentialsDto credentialsDto) {
         if (!credentialsRepository.existsByName(credentialsDto.getName())) {
             String key = credentialsDto.getKey();
             String secret = credentialsDto.getSecret();
@@ -84,6 +85,18 @@ public class ConnectionServiceImpl implements ConnectionService {
 
         }
         return String.format("Connection with name %s already exists!", credentialsDto.getName());
+    }
+
+    @Override
+    public boolean setPercentage(String name, Double percentage) {
+        Credentials credentials = credentialsRepository.findByName(name)
+                .orElseThrow(() -> new NoSuchElementException(String.format("Credentials for user %s not found!", name)));
+        credentials.setPercentage(percentage);
+        credentialsRepository.save(credentials);
+        clients.stream()
+                .filter(client -> client.getName().equals(name))
+                .forEach(client -> client.setPercentage(percentage));
+        return true;
     }
 
 }

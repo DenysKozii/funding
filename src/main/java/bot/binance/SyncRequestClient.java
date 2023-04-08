@@ -16,4 +16,6 @@ public interface SyncRequestClient {
 
     Double getPercentage();
 
+    void setPercentage(Double percentage);
+
 }
