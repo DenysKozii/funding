@@ -7,7 +7,7 @@ import bot.dto.TradeDto;
 
 import java.util.List;
 
-public interface Trading {
+public interface TradingService {
 
     void open(SyncRequestClient client);
 

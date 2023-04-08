@@ -3,7 +3,7 @@ package bot.service.impl;
 import bot.dto.CredentialsDto;
 import bot.entity.Credentials;
 import bot.repository.CredentialsRepository;
-import bot.service.Connection;
+import bot.service.ConnectionService;
 import bot.binance.RequestOptions;
 import bot.binance.SyncRequestClient;
 import bot.binance.BinanceApiException;
@@ -25,14 +25,14 @@ import java.util.List;
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ConnectionImpl implements Connection {
+public class ConnectionServiceImpl implements ConnectionService {
 
     CredentialsRepository credentialsRepository;
 
     List<SyncRequestClient> clients = new ArrayList<>();
 
     @Autowired
-    public ConnectionImpl(CredentialsRepository credentialsRepository) {
+    public ConnectionServiceImpl(CredentialsRepository credentialsRepository) {
         this.credentialsRepository = credentialsRepository;
     }
 

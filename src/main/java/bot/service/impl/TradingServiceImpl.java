@@ -11,7 +11,7 @@ import bot.mapper.FundingMapper;
 import bot.mapper.TradeMapper;
 import bot.repository.FundingRepository;
 import bot.repository.TradeRepository;
-import bot.service.Trading;
+import bot.service.TradingService;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TradingImpl implements Trading {
+public class TradingServiceImpl implements TradingService {
 
     final SimpleDateFormat formatter;
     final String websocketUrl;
@@ -60,15 +60,15 @@ public class TradingImpl implements Trading {
     FundingRepository fundingRepository;
 
     @Autowired
-    public TradingImpl(@Value("${websocket.url}") String websocketUrl,
-                       @Value("${trade.percentage}") Double tradePercentage,
-                       @Value("${symbol.default}") String symbol,
-                       @Value("${round.start}") Integer roundStart,
-                       @Value("${date.format.pattern}") String dateFormatPattern,
-                       @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
-                       @Value("${spliterator}") String spliterator,
-                       TradeRepository tradeRepository,
-                       FundingRepository fundingRepository) {
+    public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl,
+                              @Value("${trade.percentage}") Double tradePercentage,
+                              @Value("${symbol.default}") String symbol,
+                              @Value("${round.start}") Integer roundStart,
+                              @Value("${date.format.pattern}") String dateFormatPattern,
+                              @Value("${update.websocket.suffix}") String updateWebsocketSuffix,
+                              @Value("${spliterator}") String spliterator,
+                              TradeRepository tradeRepository,
+                              FundingRepository fundingRepository) {
         this.websocketUrl = websocketUrl;
         this.tradePercentage = tradePercentage;
         this.symbol = symbol;

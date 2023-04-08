@@ -3,8 +3,8 @@ package bot.api;
 import bot.dto.CredentialsDto;
 import bot.dto.FundingDto;
 import bot.dto.TradeDto;
-import bot.service.Connection;
-import bot.service.Trading;
+import bot.service.ConnectionService;
+import bot.service.TradingService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,32 +18,27 @@ import java.util.List;
 @RequestMapping("api/v1")
 public class UserRestController {
 
-    Connection connection;
-    Trading trading;
-
-    @GetMapping
-    public String alive() {
-        return "alive";
-    }
+    ConnectionService connectionService;
+    TradingService tradingService;
 
     @PostMapping("credentials")
-    public String addCredentials(@RequestBody CredentialsDto credentialsDto) {
-        return connection.addCredentials(credentialsDto);
+    String addCredentials(@RequestBody CredentialsDto credentialsDto) {
+        return connectionService.addCredentials(credentialsDto);
     }
 
     @GetMapping("reconnect")
-    public void reconnect() {
-        trading.reconnectSocket();
+    void reconnect() {
+        tradingService.reconnectSocket();
     }
 
     @GetMapping("trades")
-    public List<TradeDto> getTrades() {
-        return trading.getTrades();
+    List<TradeDto> getTrades() {
+        return tradingService.getTrades();
     }
 
     @GetMapping("fundings")
-    public List<FundingDto> getFundingss() {
-        return trading.getFundings();
+    List<FundingDto> getFundingss() {
+        return tradingService.getFundings();
     }
 
 }

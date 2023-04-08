@@ -5,7 +5,7 @@ import bot.dto.CredentialsDto;
 
 import java.util.List;
 
-public interface Connection {
+public interface ConnectionService {
 
     String addCredentials(CredentialsDto credentials);
 
