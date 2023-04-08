@@ -1,10 +1,16 @@
 package bot.binance;
 
-public class SyncRequestImpl implements SyncRequestClient {
-    private final RestApiRequestImpl requestImpl;
+import lombok.Data;
 
-    SyncRequestImpl(RestApiRequestImpl requestImpl) {
+@Data
+public class SyncRequestImpl implements SyncRequestClient {
+
+    private final RestApiRequestImpl requestImpl;
+    private final String name;
+
+    SyncRequestImpl(RestApiRequestImpl requestImpl, String name) {
         this.requestImpl = requestImpl;
+        this.name = name;
     }
 
     public Order postOrder(String symbol, OrderSide side, PositionSide positionSide, OrderType orderType, TimeInForce timeInForce, String quantity, String price, String reduceOnly, String newClientOrderId, String stopPrice, String closePosition, String activationPrice, String callbackRate, WorkingType workingType, String priceProtect, NewOrderRespType newOrderRespType) {

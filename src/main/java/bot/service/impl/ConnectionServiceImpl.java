@@ -40,7 +40,11 @@ public class ConnectionServiceImpl implements ConnectionService {
     public void initialize() {
         credentialsRepository.findAll().forEach(credentials -> clients.add(BinanceApiInternalFactory
                 .getInstance()
-                .createSyncRequestClient(credentials.getKey(), credentials.getSecret(), new RequestOptions())));
+                .createSyncRequestClient(
+                        credentials.getKey(),
+                        credentials.getSecret(),
+                        credentials.getName(),
+                        new RequestOptions())));
         clients.forEach(client -> log.info("connected to an account with futures balance = {}",
                 client.getAccountInformation().getAvailableBalance()));
     }
@@ -53,7 +57,7 @@ public class ConnectionServiceImpl implements ConnectionService {
             String name = credentialsDto.getName();
             try {
                 SyncRequestClient client = BinanceApiInternalFactory.getInstance()
-                        .createSyncRequestClient(key, secret, new RequestOptions());
+                        .createSyncRequestClient(key, secret, name, new RequestOptions());
                 log.info("connected to an account with futures balance = {}",
                         client.getAccountInformation().getAvailableBalance());
                 clients.add(client);

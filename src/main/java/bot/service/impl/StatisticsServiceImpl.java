@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,13 +32,31 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<StatisticsDto> getStatistics() {
-        ArrayList<StatisticsDto> statistics = new ArrayList<>();
-        Double profitSum = tradeRepository.findAll().stream()
-                .map(Trade::getProfit)
-                .mapToDouble(Double::doubleValue)
-                .sum();
-        statistics.add(new StatisticsDto("Denys", profitSum));
-        return statistics;
+        HashMap<String, StatisticsDto> statisticsMap = new HashMap<>();
+        for (Trade trade : tradeRepository.findAll()) {
+            String name = trade.getName();
+            StatisticsDto previousStatistics = statisticsMap.get(name);
+            StatisticsDto statistics = StatisticsDto.builder()
+                    .name(name)
+                    .tradesAmount(1)
+                    .tradesPositive(trade.getProfit() >= 0 ? 1 : 0)
+                    .tradesNegative(trade.getProfit() < 0 ? 1 : 0)
+                    .totalProfit(trade.getProfit())
+                    .build();
+
+            if (previousStatistics != null) {
+                statistics.setTradesAmount(previousStatistics.getTradesAmount() + 1);
+                statistics.setTradesPositive(trade.getProfit() >= 0 ?
+                        previousStatistics.getTradesPositive() + 1 :
+                        previousStatistics.getTradesPositive());
+                statistics.setTradesNegative(trade.getProfit() < 0 ?
+                        previousStatistics.getTradesNegative() + 1:
+                        previousStatistics.getTradesNegative());
+                statistics.setTotalProfit(previousStatistics.getTotalProfit() + statistics.getTotalProfit());
+            }
+            statisticsMap.put(name, statistics);
+        }
+        return new ArrayList<>(statisticsMap.values());
     }
 
     @Override
@@ -53,4 +72,5 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .map(FundingMapper.INSTANCE::mapToDto)
                 .collect(Collectors.toList());
     }
+
 }

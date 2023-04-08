@@ -115,9 +115,12 @@ public class TradingServiceImpl implements TradingService {
             log.info("position {} is already closed", symbol);
             if (openBalance != 0.0) {
                 double accountBalance = getAccountBalance(client);
+
+
+
                 Trade trade = Trade.builder()
                         .date(formatter.format(new Date()))
-                        .name("Denys")
+                        .name(client.getName())
                         .symbol(symbol)
                         .balanceBefore(openBalance)
                         .balanceAfter(accountBalance)
@@ -196,7 +199,6 @@ public class TradingServiceImpl implements TradingService {
     }
 
     @Override
-    @SneakyThrows
     public void updateFunding() {
         List<String> elements = getFunding();
         symbol = elements.get(0);
@@ -238,8 +240,8 @@ public class TradingServiceImpl implements TradingService {
         return accountInformation.getAvailableBalance().doubleValue();
     }
 
-    @SneakyThrows
     @Override
+    @SneakyThrows
     public void reconnectSocket() {
         log.info("reconnect websocket");
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {

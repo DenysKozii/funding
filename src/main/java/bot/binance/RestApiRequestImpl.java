@@ -13,15 +13,10 @@ class RestApiRequestImpl {
     private String secretKey;
     private String serverUrl;
 
-    RestApiRequestImpl(String apiKey, String secretKey, RequestOptions options) {
+    RestApiRequestImpl(String apiKey, String secretKey , RequestOptions options) {
         this.apiKey = apiKey;
         this.secretKey = secretKey;
         this.serverUrl = options.getUrl();
-    }
-
-    private Request createRequestByGet(String address, UrlParamsBuilder builder) {
-        log.debug("Request URL " + this.serverUrl);
-        return this.createRequestByGet(this.serverUrl, address, builder);
     }
 
     private Request createRequestByGet(String url, String address, UrlParamsBuilder builder) {
@@ -226,5 +221,6 @@ class RestApiRequestImpl {
         };
         return request;
     }
+
 
 }

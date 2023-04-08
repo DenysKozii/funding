@@ -10,10 +10,13 @@ public final class BinanceApiInternalFactory {
     private BinanceApiInternalFactory() {
     }
 
-    public SyncRequestClient createSyncRequestClient(String apiKey, String secretKey, RequestOptions options) {
+    public SyncRequestClient createSyncRequestClient(String apiKey,
+                                                     String secretKey,
+                                                     String name,
+                                                     RequestOptions options) {
         RequestOptions requestOptions = new RequestOptions(options);
         RestApiRequestImpl requestImpl = new RestApiRequestImpl(apiKey, secretKey, requestOptions);
-        return new SyncRequestImpl(requestImpl);
+        return new SyncRequestImpl(requestImpl, name);
     }
 
 }
