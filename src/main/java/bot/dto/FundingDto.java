@@ -17,7 +17,7 @@ public class FundingDto {
 
     String symbol;
 
-    Double value;
+    Double rate;
 
     Boolean skip;
 

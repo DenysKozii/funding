@@ -206,7 +206,7 @@ public class TradingServiceImpl implements TradingService {
 
         Funding funding = Funding.builder()
                 .date(formatter.format(new Date()))
-                .value(rate)
+                .rate(rate)
                 .symbol(symbol)
                 .skip(ProfitLevel.REJECT.equals(profitLevel))
                 .build();

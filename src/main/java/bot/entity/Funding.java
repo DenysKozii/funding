@@ -19,7 +19,7 @@ public class Funding {
 
     String symbol;
 
-    Double value;
+    Double rate;
 
     Boolean skip;
 
