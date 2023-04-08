@@ -16,6 +16,8 @@ public class TradeDto {
 
     String name;
 
+    String symbol;
+
     Double balanceBefore;
 
     Double balanceAfter;

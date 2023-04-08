@@ -122,9 +122,11 @@ public class TradingImpl implements Trading {
                 double accountBalance = getAccountBalance(client);
                 Trade trade = Trade.builder()
                         .date(formatter.format(new Date()))
+                        .name("Denys")
+                        .symbol(symbol)
                         .balanceBefore(openBalance)
                         .balanceAfter(accountBalance)
-                        .profit(accountBalance / openBalance)
+                        .profit(accountBalance / openBalance - 1.0)
                         .build();
                 tradeRepository.save(trade);
                 openBalance = 0.0;

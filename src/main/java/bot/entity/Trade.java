@@ -19,6 +19,8 @@ public class Trade {
 
     String name;
 
+    String symbol;
+
     Double balanceBefore;
 
     Double balanceAfter;
