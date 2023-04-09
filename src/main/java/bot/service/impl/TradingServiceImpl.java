@@ -112,9 +112,6 @@ public class TradingServiceImpl implements TradingService {
             log.info("{}: position {} is already closed", client.getName(), symbol);
             if (openBalance != 0.0) {
                 double accountBalance = getAccountBalance(client);
-
-
-
                 Trade trade = Trade.builder()
                         .date(formatter.format(new Date()))
                         .name(client.getName())

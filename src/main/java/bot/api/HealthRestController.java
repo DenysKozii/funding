@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1")
 public class HealthRestController {
 
-    @GetMapping("alive")
+    @GetMapping
     String alive() {
         return "alive";
     }
