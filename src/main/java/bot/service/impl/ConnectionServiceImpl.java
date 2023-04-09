@@ -88,7 +88,8 @@ public class ConnectionServiceImpl implements ConnectionService {
     }
 
     @Override
-    public boolean setPercentage(String name, Double percentage) {
+    public boolean setPercentage(String name, Double percentageToUpdate) {
+        Double percentage = Math.max(Math.min(percentageToUpdate, percentageMax), 0);
         Credentials credentials = credentialsRepository.findByName(name)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Credentials for user %s not found!", name)));
         credentials.setPercentage(percentage);

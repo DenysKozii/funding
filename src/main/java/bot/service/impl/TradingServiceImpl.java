@@ -201,7 +201,12 @@ public class TradingServiceImpl implements TradingService {
         price = Double.parseDouble(elements.get(2));
         ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
 
-        Funding funding = Funding.builder().date(formatter.format(new Date())).rate(rate).symbol(symbol).skip(ProfitLevel.REJECT.equals(profitLevel)).build();
+        Funding funding = Funding.builder()
+                .date(formatter.format(new Date()))
+                .rate(rate)
+                .symbol(symbol)
+                .skip(ProfitLevel.REJECT.equals(profitLevel))
+                .build();
         fundingRepository.save(funding);
     }
 
