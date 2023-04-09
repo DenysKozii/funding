@@ -36,7 +36,7 @@ public class Scheduler {
         this.connectionService = connectionService;
     }
 
-    @Scheduled(fixedRate = 1000 * 60)
+    @Scheduled(fixedRate = 1000 * 60 * 10)
     public void timer() throws IOException {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             HttpUriRequest request = new HttpGet(herokuUrl);
@@ -46,15 +46,15 @@ public class Scheduler {
 
     private void open() {
         tradingService.updateFunding();
-        log.info("open started");
+        log.info("Open started");
         connectionService.getClients().parallelStream().forEach(tradingService::open);
-        log.info("open finished");
+        log.info("Open finished");
     }
 
     private void close() {
-        log.info("close market started");
+        log.info("Close market started");
         connectionService.getClients().parallelStream().forEach(tradingService::close);
-        log.info("close market finished");
+        log.info("Close market finished");
     }
 
     @Scheduled(cron = "${cron.reconnect.0}", zone = "GMT+0")
