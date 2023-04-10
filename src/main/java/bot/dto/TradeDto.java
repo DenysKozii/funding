@@ -24,4 +24,6 @@ public class TradeDto {
 
     Double profit;
 
+    Double fundingRate;
+
 }

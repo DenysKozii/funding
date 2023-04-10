@@ -119,6 +119,7 @@ public class TradingServiceImpl implements TradingService {
                         .balanceBefore(openBalance)
                         .balanceAfter(accountBalance)
                         .profit(accountBalance / openBalance - 1.0)
+                        .fundingRate(rate)
                         .build();
                 tradeRepository.save(trade);
                 openBalance = 0.0;
@@ -246,4 +247,13 @@ public class TradingServiceImpl implements TradingService {
         }
     }
 
+    @Override
+    public void logFunding() {
+        Funding funding = fundingRepository.findFirstByOrderByIdDesc()
+                .orElseThrow(() -> new NoSuchElementException("No fundings found!"));
+        List<String> elements = getFunding();
+        double stretchPrice = Double.parseDouble(elements.get(2));
+        funding.setStretch(stretchPrice / price - 1.0);
+        fundingRepository.save(funding);
+    }
 }

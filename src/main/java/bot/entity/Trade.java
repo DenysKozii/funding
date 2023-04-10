@@ -27,4 +27,6 @@ public class Trade {
 
     Double profit;
 
+    Double fundingRate;
+
 }

@@ -77,6 +77,11 @@ public class Scheduler {
         open();
     }
 
+    @Scheduled(cron = "${cron.log.funding0}", zone = "GMT+0")
+    public void log0() {
+        tradingService.logFunding();
+    }
+
     @Scheduled(cron = "${cron.close.015}", zone = "GMT+0")
     public void close015() {
         close();
@@ -112,6 +117,12 @@ public class Scheduler {
         open();
     }
 
+    @Scheduled(cron = "${cron.log.funding8}", zone = "GMT+0")
+    public void log8() {
+        tradingService.logFunding();
+    }
+
+
     @Scheduled(cron = "${cron.close.815}", zone = "GMT+0")
     public void close815() {
         close();
@@ -145,6 +156,11 @@ public class Scheduler {
     @Scheduled(cron = "${cron.open.16}", zone = "GMT+0")
     public void open16() {
         open();
+    }
+
+    @Scheduled(cron = "${cron.log.funding16}", zone = "GMT+0")
+    public void log16() {
+        tradingService.logFunding();
     }
 
     @Scheduled(cron = "${cron.close.1615}", zone = "GMT+0")

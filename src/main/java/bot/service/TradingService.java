@@ -25,4 +25,6 @@ public interface TradingService {
 
     void reconnectSocket();
 
+    void logFunding();
+
 }
