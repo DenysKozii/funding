@@ -21,6 +21,8 @@ public class Funding {
 
     Double rate;
 
+    Double stretch;
+
     Boolean skip;
 
 }
