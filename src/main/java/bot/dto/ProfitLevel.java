@@ -10,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ProfitLevel {
     REJECT(0.0, 0.006),
-    LOW(0.0009, 0.01),
-    MEDIUM(0.0017, 0.015),
+    LOW(0.0012, 0.01),
+    MEDIUM(0.0018, 0.015),
     HIGH(0.0025, 1.0);
 
     Double profit;
