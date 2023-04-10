@@ -62,6 +62,16 @@ public class Scheduler {
         tradingService.reconnectSocket();
     }
 
+    @Scheduled(cron = "${cron.reconnect.01}", zone = "GMT+0")
+    public void reconnect01() {
+        tradingService.reconnectSocket();
+    }
+
+    @Scheduled(cron = "${cron.reconnect.02}", zone = "GMT+0")
+    public void reconnect02() {
+        tradingService.reconnectSocket();
+    }
+
     @Scheduled(cron = "${cron.open.0}", zone = "GMT+0")
     public void open0() {
         open();
@@ -87,6 +97,16 @@ public class Scheduler {
         tradingService.reconnectSocket();
     }
 
+    @Scheduled(cron = "${cron.reconnect.81}", zone = "GMT+0")
+    public void reconnect81() {
+        tradingService.reconnectSocket();
+    }
+
+    @Scheduled(cron = "${cron.reconnect.82}", zone = "GMT+0")
+    public void reconnect82() {
+        tradingService.reconnectSocket();
+    }
+
     @Scheduled(cron = "${cron.open.8}", zone = "GMT+0")
     public void open8() {
         open();
@@ -109,6 +129,16 @@ public class Scheduler {
 
     @Scheduled(cron = "${cron.reconnect.16}", zone = "GMT+0")
     public void reconnect16() {
+        tradingService.reconnectSocket();
+    }
+
+    @Scheduled(cron = "${cron.reconnect.161}", zone = "GMT+0")
+    public void reconnect161() {
+        tradingService.reconnectSocket();
+    }
+
+    @Scheduled(cron = "${cron.reconnect.162}", zone = "GMT+0")
+    public void reconnect162() {
         tradingService.reconnectSocket();
     }
 
