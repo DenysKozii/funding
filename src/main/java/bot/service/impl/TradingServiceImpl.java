@@ -252,8 +252,10 @@ public class TradingServiceImpl implements TradingService {
         Funding funding = fundingRepository.findFirstByOrderByIdDesc()
                 .orElseThrow(() -> new NoSuchElementException("No fundings found!"));
         List<String> elements = getFunding();
-        double stretchPrice = Double.parseDouble(elements.get(2));
-        funding.setStretch(stretchPrice / price - 1.0);
+        double priceStretch = Double.parseDouble(elements.get(2));
+        funding.setPriceBefore(price);
+        funding.setPriceAfter(priceStretch);
+        funding.setStretch(priceStretch / price - 1.0);
         fundingRepository.save(funding);
     }
 }

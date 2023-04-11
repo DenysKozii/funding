@@ -23,6 +23,10 @@ public class Funding {
 
     Double stretch;
 
+    Double priceBefore;
+
+    Double priceAfter;
+
     Boolean skip;
 
 }

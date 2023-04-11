@@ -19,6 +19,12 @@ public class FundingDto {
 
     Double rate;
 
+    Double stretch;
+
+    Double priceBefore;
+
+    Double priceAfter;
+
     Boolean skip;
 
 }
