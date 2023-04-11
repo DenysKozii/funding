@@ -47,7 +47,6 @@ public class TradingServiceImpl implements TradingService {
     Double responsePrice;
     Double quantity;
     String positionQuantity;
-    OrderSide orderSide;
     Integer roundStart;
     Double openBalance;
     TradeRepository tradeRepository;
@@ -96,9 +95,12 @@ public class TradingServiceImpl implements TradingService {
         positionQuantity = quantity.intValue() > 0 ?
                 String.valueOf(quantity.intValue()) :
                 String.format("%.1f", quantity);
-        orderSide = rate > 0 ? OrderSide.BUY : OrderSide.SELL;
+        client.setOrderSide(rate > 0 ? OrderSide.BUY : OrderSide.SELL);
         openBalance = accountBalance;
-        log.info("{}: open quantity = {}, rate = {}, order side = {}", client.getName(), positionQuantity, rate, orderSide);
+        log.info("{}: open quantity = {}, rate = {}, order side = {}", client.getName(),
+                positionQuantity,
+                rate,
+                client.getOrderSide());
         sendMarketOrder(client);
         closeLimit(client);
     }
@@ -127,10 +129,10 @@ public class TradingServiceImpl implements TradingService {
             return;
         }
 
-        if (OrderSide.BUY.equals(orderSide)) {
-            orderSide = OrderSide.SELL;
+        if (OrderSide.BUY.equals(client.getOrderSide())) {
+            client.setOrderSide(OrderSide.SELL);
         } else {
-            orderSide = OrderSide.BUY;
+            client.setOrderSide(OrderSide.BUY);
         }
         if (position.get().getPositionAmt().doubleValue() < 0) {
             positionQuantity = String.valueOf(-1 * position.get().getPositionAmt().doubleValue());
@@ -158,8 +160,8 @@ public class TradingServiceImpl implements TradingService {
     @Override
     public boolean sendLimitOrder(SyncRequestClient client, int round, ProfitLevel profitLevel) {
         try {
-            OrderSide side;
-            if (OrderSide.BUY.equals(orderSide)) {
+            OrderSide side = client.getOrderSide();
+            if (OrderSide.BUY.equals(side)) {
                 side = OrderSide.SELL;
                 price = new BigDecimal(responsePrice * (1 + rate + profitLevel.getProfit()))
                         .setScale(round, RoundingMode.HALF_UP)
@@ -185,7 +187,7 @@ public class TradingServiceImpl implements TradingService {
     @Override
     public void sendMarketOrder(SyncRequestClient client) {
         Order order = client.postOrder(
-                symbol, orderSide, PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
+                symbol, client.getOrderSide(), PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();

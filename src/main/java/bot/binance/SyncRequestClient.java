@@ -16,6 +16,10 @@ public interface SyncRequestClient {
 
     Double getPercentage();
 
+    OrderSide getOrderSide();
+
     void setPercentage(Double percentage);
+
+    void setOrderSide(OrderSide orderSide);
 
 }
