@@ -14,16 +14,24 @@ public interface SyncRequestClient {
 
     String getName();
 
-    Double getPercentage();
+    double getPercentage();
 
     OrderSide getOrderSide();
 
-    Double getResponsePrice();
+    double getResponsePrice();
 
-    void setPercentage(Double percentage);
+    String getPositionQuantity();
+
+    double getOpenBalance();
+
+    void setPercentage(double percentage);
 
     void setOrderSide(OrderSide orderSide);
 
-    void setResponsePrice(Double responsePrice);
+    void setResponsePrice(double responsePrice);
+
+    void setPositionQuantity(String positionQuantity);
+
+    void setOpenBalance(double openBalance);
 
 }

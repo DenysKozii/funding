@@ -45,12 +45,11 @@ public class TradingServiceImpl implements TradingService {
     Double rate;
     Double price;
     Double quantity;
-    String positionQuantity;
     Integer roundStart;
-    Double openBalance;
+    int round = -1;
+
     TradeRepository tradeRepository;
     FundingRepository fundingRepository;
-    int round = -1;
 
     @Autowired
     public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl,
@@ -92,17 +91,22 @@ public class TradingServiceImpl implements TradingService {
         quantity = accountBalance * client.getPercentage();
         quantity *= leverage;
         quantity /= price;
-        positionQuantity = quantity.intValue() > 0 ?
+        client.setPositionQuantity(quantity.intValue() > 0 ?
                 String.valueOf(quantity.intValue()) :
-                String.format("%.1f", quantity);
+                String.format("%.1f", quantity));
         client.setOrderSide(rate > 0 ? OrderSide.BUY : OrderSide.SELL);
-        openBalance = accountBalance;
-        log.info("{}: open quantity = {}, rate = {}, order side = {}", client.getName(),
-                positionQuantity,
-                rate,
-                client.getOrderSide());
-        sendMarketOrder(client);
-        closeLimit(client);
+        client.setOpenBalance(accountBalance);
+        if (!"0.0".equals(client.getPositionQuantity())) {
+            log.info("{}: open quantity = {}, rate = {}, order side = {}", client.getName(),
+                    client.getPositionQuantity(),
+                    rate,
+                    client.getOrderSide());
+            sendMarketOrder(client);
+            closeLimit(client);
+        } else {
+            log.warn("{}: position quantity = {}. Orders have not been sent", client.getName(),
+                    client.getPositionQuantity());
+        }
     }
 
     @Override
@@ -112,19 +116,19 @@ public class TradingServiceImpl implements TradingService {
         client.cancelAllOpenOrder(symbol);
         if (position.isEmpty() || position.get().getPositionAmt().doubleValue() == 0.0) {
             log.info("{}: position {} is already closed", client.getName(), symbol);
-            if (openBalance != 0.0) {
+            if (client.getOpenBalance() != 0.0) {
                 double accountBalance = getAccountBalance(client);
                 Trade trade = Trade.builder()
                         .date(formatter.format(new Date()))
                         .name(client.getName())
                         .symbol(symbol)
-                        .balanceBefore(openBalance)
+                        .balanceBefore(client.getOpenBalance())
                         .balanceAfter(accountBalance)
-                        .profit(accountBalance / openBalance - 1.0)
+                        .profit(accountBalance / client.getOpenBalance() - 1.0)
                         .fundingRate(rate)
                         .build();
                 tradeRepository.save(trade);
-                openBalance = 0.0;
+                client.setOpenBalance(0.0);
             }
             return;
         }
@@ -135,7 +139,7 @@ public class TradingServiceImpl implements TradingService {
             client.setOrderSide(OrderSide.BUY);
         }
         if (position.get().getPositionAmt().doubleValue() < 0) {
-            positionQuantity = String.valueOf(-1 * position.get().getPositionAmt().doubleValue());
+            client.setPositionQuantity(String.valueOf(-1 * position.get().getPositionAmt().doubleValue()));
         }
         sendMarketOrder(client);
     }
@@ -175,7 +179,7 @@ public class TradingServiceImpl implements TradingService {
                         .doubleValue();
             }
             Order order = client.postOrder(
-                    symbol, side, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, positionQuantity,
+                    symbol, side, PositionSide.BOTH, OrderType.LIMIT, TimeInForce.GTC, client.getPositionQuantity(),
                     price.toString(), null, null, null, null, null, null, null, null,
                     NewOrderRespType.RESULT);
             log.info("{}: {} limit close with round = {} and price = {}", client.getName(), symbol, round, order.getPrice());
@@ -189,13 +193,13 @@ public class TradingServiceImpl implements TradingService {
     @Override
     public void sendMarketOrder(SyncRequestClient client) {
         Order order = client.postOrder(
-                symbol, client.getOrderSide(), PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
+                symbol, client.getOrderSide(), PositionSide.BOTH, OrderType.MARKET, null, client.getPositionQuantity(),
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
         client.setResponsePrice(order.getAvgPrice().doubleValue());
-        positionQuantity = order.getExecutedQty().toString();
+        client.setPositionQuantity(order.getExecutedQty().toString());
         log.info("{}: {} open order sent with executed avg price = {} and quantity = {}",
-                client.getName(), symbol, client.getResponsePrice(), positionQuantity);
+                client.getName(), symbol, client.getResponsePrice(), client.getPositionQuantity());
     }
 
     @Override

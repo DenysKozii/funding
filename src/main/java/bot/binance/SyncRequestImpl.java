@@ -1,20 +1,25 @@
 package bot.binance;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SyncRequestImpl implements SyncRequestClient {
 
-    private final RestApiRequestImpl requestImpl;
-    private String name;
-    private Double percentage;
-    private OrderSide orderSide;
-    private Double responsePrice;
+    final RestApiRequestImpl requestImpl;
+    String name;
+    double percentage;
+    OrderSide orderSide;
+    double responsePrice;
+    String positionQuantity;
+    double openBalance;
 
 
     SyncRequestImpl(RestApiRequestImpl requestImpl,
                     String name,
-                    Double percentage) {
+                    double percentage) {
         this.requestImpl = requestImpl;
         this.name = name;
         this.percentage = percentage;
