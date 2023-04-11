@@ -44,7 +44,6 @@ public class TradingServiceImpl implements TradingService {
     String symbol;
     Double rate;
     Double price;
-    Double responsePrice;
     Double quantity;
     String positionQuantity;
     Integer roundStart;
@@ -76,7 +75,7 @@ public class TradingServiceImpl implements TradingService {
     @Override
     @SneakyThrows
     public void open(SyncRequestClient client) {
-        responsePrice = 0.0;
+        client.setResponsePrice(0.0);
         ProfitLevel profitLevel = ProfitLevel.getProfitLevel(Math.abs(rate));
         if (ProfitLevel.REJECT.equals(profitLevel)) {
             log.info("{}: rate {} is lower than limit {}", client.getName(), rate, profitLevel.getFunding());
@@ -166,12 +165,12 @@ public class TradingServiceImpl implements TradingService {
             OrderSide side = client.getOrderSide();
             if (OrderSide.BUY.equals(side)) {
                 side = OrderSide.SELL;
-                price = new BigDecimal(responsePrice * (1 + rate + profitLevel.getProfit()))
+                price = BigDecimal.valueOf(client.getResponsePrice() * (1 + rate + profitLevel.getProfit()))
                         .setScale(round, RoundingMode.HALF_UP)
                         .doubleValue();
             } else {
                 side = OrderSide.BUY;
-                price = new BigDecimal(responsePrice * (1 + rate - profitLevel.getProfit()))
+                price = BigDecimal.valueOf(client.getResponsePrice() * (1 + rate - profitLevel.getProfit()))
                         .setScale(round, RoundingMode.HALF_DOWN)
                         .doubleValue();
             }
@@ -193,10 +192,10 @@ public class TradingServiceImpl implements TradingService {
                 symbol, client.getOrderSide(), PositionSide.BOTH, OrderType.MARKET, null, positionQuantity,
                 null, null, null, null, null, null, null, null, null,
                 NewOrderRespType.RESULT);
-        responsePrice = order.getAvgPrice().doubleValue();
+        client.setResponsePrice(order.getAvgPrice().doubleValue());
         positionQuantity = order.getExecutedQty().toString();
         log.info("{}: {} open order sent with executed avg price = {} and quantity = {}",
-                client.getName(), symbol, responsePrice, positionQuantity);
+                client.getName(), symbol, client.getResponsePrice(), positionQuantity);
     }
 
     @Override

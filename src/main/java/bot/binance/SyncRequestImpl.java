@@ -9,6 +9,8 @@ public class SyncRequestImpl implements SyncRequestClient {
     private String name;
     private Double percentage;
     private OrderSide orderSide;
+    private Double responsePrice;
+
 
     SyncRequestImpl(RestApiRequestImpl requestImpl,
                     String name,
