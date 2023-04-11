@@ -49,6 +49,7 @@ public class Scheduler {
         log.info("Open started");
         connectionService.getClients().parallelStream().forEach(tradingService::open);
         log.info("Open finished");
+        tradingService.setRound(-1);
     }
 
     private void close() {

@@ -51,6 +51,7 @@ public class TradingServiceImpl implements TradingService {
     Double openBalance;
     TradeRepository tradeRepository;
     FundingRepository fundingRepository;
+    int round = -1;
 
     @Autowired
     public TradingServiceImpl(@Value("${websocket.url}") String websocketUrl,
@@ -145,8 +146,10 @@ public class TradingServiceImpl implements TradingService {
         Optional<Position> position = client.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         if (position.isPresent() && position.get().getPositionAmt() != null) {
-            int round = price > 1 ? 4 : roundStart;
-            round = price > 100 ? 3 : round;
+            if (round == -1) {
+                round = price > 1 ? 4 : roundStart;
+                round = price > 100 ? 3 : round;
+            }
             double absoluteRate = Math.abs(rate);
             ProfitLevel profitLevel = ProfitLevel.getProfitLevel(absoluteRate);
             while (!sendLimitOrder(client, round, profitLevel) && round > 0) {
@@ -192,7 +195,7 @@ public class TradingServiceImpl implements TradingService {
                 NewOrderRespType.RESULT);
         responsePrice = order.getAvgPrice().doubleValue();
         positionQuantity = order.getExecutedQty().toString();
-        log.info("{}: {} order sent with executed avg price = {} and quantity = {}",
+        log.info("{}: {} open order sent with executed avg price = {} and quantity = {}",
                 client.getName(), symbol, responsePrice, positionQuantity);
     }
 
