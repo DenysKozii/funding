@@ -95,7 +95,6 @@ public class TradingServiceImpl implements TradingService {
                 String.valueOf(quantity.intValue()) :
                 String.format("%.1f", quantity));
         client.setOrderSide(rate > 0 ? OrderSide.BUY : OrderSide.SELL);
-        client.setOpenBalance(accountBalance);
         if (!"0.0".equals(client.getPositionQuantity())) {
             log.info("{}: open quantity = {}, rate = {}, order side = {}", client.getName(),
                     client.getPositionQuantity(),
@@ -103,6 +102,7 @@ public class TradingServiceImpl implements TradingService {
                     client.getOrderSide());
             sendMarketOrder(client);
             closeLimit(client);
+            client.setOpenBalance(accountBalance);
         } else {
             log.warn("{}: position quantity = {}. Orders have not been sent", client.getName(),
                     client.getPositionQuantity());
