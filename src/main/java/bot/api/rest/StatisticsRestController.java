@@ -1,4 +1,4 @@
-package bot.api;
+package bot.api.rest;
 
 import bot.dto.FundingDto;
 import bot.dto.StatisticsDto;

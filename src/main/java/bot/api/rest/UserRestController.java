@@ -1,4 +1,4 @@
-package bot.api;
+package bot.api.rest;
 
 import bot.dto.CredentialsDto;
 import bot.service.ConnectionService;

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:replace="~{common :: header(value='index')}"></div>
+<div th:replace="~{common :: navbar()}"></div>
+<body>
+<div class="container">
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th scope="col">date</th>
+      <th scope="col">symbol</th>
+      <th scope="col">rate</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:style="${qv.getSkip()} ? 'background: #ffcab0' : 'background: #9fd3c7'" th:each="qv,iter : ${fundings}">
+      <td th:text="${qv.getDate()}"></td>
+      <td th:text="${qv.getSymbol()}"></td>
+      <td th:text="${qv.getRate() * 100}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+<div th:replace="~{common :: js-lb}"></div>
+</html>

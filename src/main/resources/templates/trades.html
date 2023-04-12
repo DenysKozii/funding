@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:replace="~{common :: header(value='index')}"></div>
+<div th:replace="~{common :: navbar()}"></div>
+<body>
+<div class="container">
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th scope="col">date</th>
+      <th scope="col">symbol</th>
+      <th scope="col">name</th>
+      <th scope="col">profit</th>
+      <th scope="col">funding</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="qv,iter : ${trades}">
+      <td th:text="${qv.getDate()}"></td>
+      <td th:text="${qv.getSymbol()}"></td>
+      <td th:text="${qv.getName()}"></td>
+      <td th:text="${qv.getProfit() * 100}"></td>
+      <td th:text="${qv.getFundingRate() * 100}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+<div th:replace="~{common :: js-lb}"></div>
+</html>
