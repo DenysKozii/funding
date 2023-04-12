@@ -15,9 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -50,7 +48,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                         previousStatistics.getTradesPositive() + 1 :
                         previousStatistics.getTradesPositive());
                 statistics.setTradesNegative(trade.getProfit() < 0 ?
-                        previousStatistics.getTradesNegative() + 1:
+                        previousStatistics.getTradesNegative() + 1 :
                         previousStatistics.getTradesNegative());
                 statistics.setTotalProfit(previousStatistics.getTotalProfit() + statistics.getTotalProfit());
             }
@@ -63,14 +61,22 @@ public class StatisticsServiceImpl implements StatisticsService {
     public List<TradeDto> getTrades() {
         return tradeRepository.findAll().stream()
                 .map(TradeMapper.INSTANCE::mapToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(Collectors.toList(),
+                        l -> {
+                            Collections.reverse(l);
+                            return l;
+                        }));
     }
 
     @Override
     public List<FundingDto> getFundings() {
         return fundingRepository.findAll().stream()
                 .map(FundingMapper.INSTANCE::mapToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(Collectors.toList(),
+                        l -> {
+                            Collections.reverse(l);
+                            return l;
+                        }));
     }
 
 }
