@@ -35,6 +35,7 @@ public class StatisticsController {
 
     @GetMapping
     String getFundings(Model model) {
+        tradingService.reconnectSocket();
         model.addAttribute("fundings", statisticsService.getFundings());
         List<String> funding = tradingService.getFunding();
         model.addAttribute("symbol", funding.get(0));
