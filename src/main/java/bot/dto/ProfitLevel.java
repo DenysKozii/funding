@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ProfitLevel {
-    REJECT(0.0, 0.002),
+    REJECT(0.0, 0.004),
     LOW(0.0009, 0.01),
     MEDIUM(0.0017, 0.015),
     HIGH(0.0025, 1.0);
