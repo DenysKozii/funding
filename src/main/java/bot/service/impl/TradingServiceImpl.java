@@ -29,7 +29,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
 @Slf4j
@@ -42,7 +41,6 @@ public class TradingServiceImpl implements TradingService {
     final String dateFormatPattern;
     final String spliterator;
     final String updateWebsocketSuffix;
-    final AtomicInteger round = new AtomicInteger(-1);
     String symbol;
     Double rate;
     Double price;
@@ -150,14 +148,12 @@ public class TradingServiceImpl implements TradingService {
         Optional<Position> position = client.getAccountInformation().getPositions()
                 .stream().filter(o -> o.getSymbol().equals(symbol)).findFirst();
         if (position.isPresent() && position.get().getPositionAmt() != null) {
-            if (round.get() == -1) {
-                round.set(price > 1 ? 4 : roundStart);
-                round.set(price > 100 ? 3 : round.get());
-            }
+            int round = price > 1 ? 4 : roundStart;
+            round = price > 100 ? 3 : round;
             double absoluteRate = Math.abs(rate);
             ProfitLevel profitLevel = ProfitLevel.getProfitLevel(absoluteRate);
-            while (!sendLimitOrder(client, round.get(), profitLevel) && round.get() > 0) {
-                round.set(round.get() - 1);
+            while (!sendLimitOrder(client, round, profitLevel) && round > 0) {
+                round -= 1;
             }
         } else {
             log.info("{}: no positions for {}", client.getName(), symbol);
@@ -266,10 +262,5 @@ public class TradingServiceImpl implements TradingService {
         funding.setPriceAfter(priceStretch);
         funding.setStretch(priceStretch / price - 1.0);
         fundingRepository.save(funding);
-    }
-
-    @Override
-    public void setRound(int round) {
-        this.round.set(round);
     }
 }

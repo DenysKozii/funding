@@ -27,6 +27,4 @@ public interface TradingService {
 
     void logFunding();
 
-    void setRound(int round);
-
 }
