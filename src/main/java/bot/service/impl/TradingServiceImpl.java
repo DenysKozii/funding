@@ -131,7 +131,7 @@ public class TradingServiceImpl implements TradingService {
             }
             return;
         }
-
+        log.info("{}: position {} has amount {}", client.getName(), symbol, position.get().getPositionAmt());
         if (OrderSide.BUY.equals(client.getOrderSide())) {
             client.setOrderSide(OrderSide.SELL);
         } else {
